@@ -2,7 +2,7 @@
 
   
   <rule id="102001" level="10">
-    <if_group>syslog,sudo</if_group>
+    <if_group>syslog|sudo</if_group>
     <match type="pcre2">(?i)(useradd|NOPASSWD|visudo|usermod\s+.*-aG\s+(sudo|wheel|admin))</match>
     <description>CCDC Linux: Privilege escalation or user/sudoers modification detected</description>
     <mitre>
@@ -89,7 +89,7 @@
   </rule>
 
   <rule id="102009" level="11">
-    <if_group>audit,syslog</if_group>
+    <if_group>audit|syslog</if_group>
     <match type="pcre2">(?i)(/dev/tcp/|bash\s+-i|nc\s+-e|ncat\s+-e|curl.*\|\s*(ba)?sh|wget.*\|\s*(ba)?sh)</match>
     <description>CCDC Linux: Reverse shell or piped payload execution detected</description>
     <mitre>
@@ -123,7 +123,7 @@
 
   <rule id="102012" level="12">
     <if_group>audit</if_group>
-    <field name="audit.key">^(shadow_read|suid_priv|ccdc_exec)$</field>
+    <field name="audit.key" type="pcre2">^(shadow_read|suid_priv|ccdc_exec)$</field>
     <match type="pcre2">(chmod\s+[u\+]*s|setcap|find\s+.*-perm\s+-4000|/etc/shadow)</match>
     <description>CCDC Linux Audit: SUID/capability abuse or /etc/shadow access</description>
     <mitre>
@@ -135,7 +135,7 @@
 
   <rule id="102013" level="7">
     <if_group>audit</if_group>
-    <field name="audit.key">^ccdc_exec$</field>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <match type="pcre2">\b(whoami|uname\s+-a|cat\s+/etc/passwd|ss\s+-|netstat\s+-)\b</match>
     <description>CCDC Linux Audit: Host discovery command executed</description>
     <mitre>
@@ -147,7 +147,7 @@
 
   <rule id="102014" level="10">
     <if_group>audit</if_group>
-    <field name="audit.key">^ccdc_exec$</field>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <match type="pcre2">\b(mysqldump|pg_dump|7z\s+a|tar\s+-c)\b</match>
     <description>CCDC Linux Audit: Database dump or archive staging executed</description>
     <mitre>
@@ -169,7 +169,7 @@
   </rule>
 
   <rule id="102016" level="10">
-    <if_group>web,accesslog</if_group>
+    <if_group>web|accesslog</if_group>
     <match type="pcre2">(?i)(union\s+select|\.\./\.\./|cmd=|eval\(|base64_decode)</match>
     <description>CCDC Linux Web: Possible SQLi, path traversal, or webshell request</description>
     <mitre>
