@@ -1,0 +1,24 @@
+<group name="local,syscheck,">
+
+  
+  <rule id="100200" level="0">
+    <if_group>syscheck</if_group>
+    <field name="syscheck.path" type="pcre2">^/var/lib/(dpkg|apt|rpm|dnf|yum)</field>
+    <description>FIM: Suppressed - package manager metadata change</description>
+  </rule>
+
+  
+  <rule id="100201" level="0">
+    <if_group>syscheck</if_group>
+    <field name="syscheck.path" type="pcre2">^/var/log/.*\.(gz|[0-9]+|old|bak)$</field>
+    <description>FIM: Suppressed - log rotation artifact</description>
+  </rule>
+
+  
+  <rule id="100202" level="0">
+    <if_group>syscheck</if_group>
+    <field name="syscheck.path" type="pcre2">^/(tmp|var/tmp|var/cache)/</field>
+    <description>FIM: Suppressed - temporary/cache file change</description>
+  </rule>
+
+</group>

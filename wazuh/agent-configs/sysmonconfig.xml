@@ -1,0 +1,39 @@
+<Sysmon schemaversion="4.90">
+  <HashAlgorithms>sha256</HashAlgorithms>
+  <CheckRevocation/>
+  <EventFiltering>
+    <RuleGroup name="" groupRelation="or">
+      <ProcessCreate onmatch="exclude" />
+      <FileCreateTime onmatch="include">
+        <TargetFilename condition="contains">\Users\</TargetFilename>
+        <TargetFilename condition="contains">\Windows\Temp\</TargetFilename>
+      </FileCreateTime>
+      <NetworkConnect onmatch="exclude">
+        <DestinationIp condition="is">127.0.0.1</DestinationIp>
+        <DestinationIp condition="is">::1</DestinationIp>
+      </NetworkConnect>
+      <ImageLoad onmatch="include">
+        <ImageLoaded condition="end with">clr.dll</ImageLoaded>
+        <ImageLoaded condition="end with">mscoree.dll</ImageLoaded>
+      </ImageLoad>
+      <CreateRemoteThread onmatch="exclude" />
+      <ProcessAccess onmatch="include">
+        <TargetImage condition="end with">lsass.exe</TargetImage>
+      </ProcessAccess>
+      <RegistryEvent onmatch="include">
+        <TargetObject condition="contains">CurrentVersion\Run</TargetObject>
+        <TargetObject condition="contains">Winlogon</TargetObject>
+        <TargetObject condition="contains">Image File Execution Options</TargetObject>
+        <TargetObject condition="contains">AppInit_DLLs</TargetObject>
+      </RegistryEvent>
+      <PipeEvent onmatch="include">
+        <PipeName condition="contains">PSEXESVC</PipeName>
+        <PipeName condition="contains">msagent_</PipeName>
+        <PipeName condition="contains">postex_</PipeName>
+        <PipeName condition="contains">status_</PipeName>
+      </PipeEvent>
+      <WmiEvent onmatch="exclude" />
+      <ProcessTampering onmatch="exclude" />
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>
