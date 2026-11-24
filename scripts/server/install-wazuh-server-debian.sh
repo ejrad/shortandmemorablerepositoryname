@@ -17,7 +17,10 @@ log_step "Installing Wazuh ${WAZUH_VER} All-in-One (Indexer, Manager, Dashboard)
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 curl -sO --output-dir "$TMP_DIR" "https://packages.wazuh.com/${WAZUH_VER}/wazuh-install.sh"
-bash "${TMP_DIR}/wazuh-install.sh" -a -o
+if ! apt-cache show software-properties-common >/dev/null 2>&1; then
+    sed -i 's/software-properties-common//g' "${TMP_DIR}/wazuh-install.sh"
+fi
+bash "${TMP_DIR}/wazuh-install.sh" -a -o -i
 
 log_step "Deploying CCDC custom rules"
 install -d -m 0750 -o root -g wazuh /var/ossec/etc/rules
