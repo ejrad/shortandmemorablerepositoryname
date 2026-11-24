@@ -14,7 +14,13 @@ apt-get update -qq
 apt-get install -y -qq curl gnupg apt-transport-https
 
 log_step "Installing Wazuh ${WAZUH_VER} All-in-One (Indexer, Manager, Dashboard)"
-TMP_DIR="$(mktemp -d)"
+if df -T /tmp | awk 'NR==2{exit ($2 != "tmpfs")}'; then
+    export TMPDIR=/var/tmp
+    TMP_DIR="$(mktemp -d -p /var/tmp)"
+    systemctl mask tmp.mount >/dev/null 2>&1 || true
+else
+    TMP_DIR="$(mktemp -d)"
+fi
 trap 'rm -rf "$TMP_DIR"' EXIT
 curl -sO --output-dir "$TMP_DIR" "https://packages.wazuh.com/${WAZUH_VER}/wazuh-install.sh"
 if ! apt-cache show software-properties-common >/dev/null 2>&1; then
