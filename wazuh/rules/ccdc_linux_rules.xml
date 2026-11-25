@@ -79,7 +79,8 @@
 
   <rule id="102008" level="12">
     <if_group>audit</if_group>
-    <field name="audit.exe" type="pcre2">^(/tmp/|/dev/shm/|/var/tmp/|memfd:)|\(deleted\)$</field>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <match type="pcre2">(exe="/(tmp|dev/shm|var/tmp)/|a[01]="/(tmp|dev/shm|var/tmp)/|memfd:|exe="[^"]*\(deleted\)")</match>
     <description>CCDC Linux Audit: Execution from temp/shm or deleted/memfd binary ($(audit.exe))</description>
     <mitre>
       <id>T1059</id>
