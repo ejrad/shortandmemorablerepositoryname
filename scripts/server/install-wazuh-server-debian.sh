@@ -27,6 +27,7 @@ if ! apt-cache show software-properties-common >/dev/null 2>&1; then
     sed -i 's/software-properties-common//g' "${TMP_DIR}/wazuh-install.sh"
 fi
 sed -i -E "s/\b1514\b/${WAZUH_EVENTS_PORT}/g; s/\b1515\b/${WAZUH_ENROLL_PORT}/g" "${TMP_DIR}/wazuh-install.sh"
+sed -i -E "s|(systemctl start )|[[ -f /var/ossec/etc/ossec.conf ]] \&\& sed -i -E 's\|<port>1514</port>\|<port>${WAZUH_EVENTS_PORT}</port>\|g; s\|<port>1515</port>\|<port>${WAZUH_ENROLL_PORT}</port>\|g' /var/ossec/etc/ossec.conf; \1|g" "${TMP_DIR}/wazuh-install.sh"
 bash "${TMP_DIR}/wazuh-install.sh" -a -o -i
 
 log_step "Deploying CCDC custom rules"
