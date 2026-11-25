@@ -124,6 +124,7 @@
   <rule id="102012" level="12">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^(shadow_read|suid_priv|ccdc_exec)$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|chage|passwd)$</field>
     <match type="pcre2">(chmod\s+[u\+]*s|setcap|find\s+.*-perm\s+-4000|/etc/shadow)</match>
     <description>CCDC Linux Audit: SUID/capability abuse or /etc/shadow access</description>
     <mitre>
