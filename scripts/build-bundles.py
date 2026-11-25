@@ -16,6 +16,7 @@ BUNDLES = {
         "wazuh/rules/ccdc_linux_rules.xml",
         "wazuh/agent-configs/windows-agent.conf",
         "wazuh/agent-configs/linux-agent.conf",
+        "wazuh/agent-configs/ccdc-audit.rules",
     ],
     "wazuh-agent-linux.tar.gz": [
         "scripts/agents/install-wazuh-agent-linux.sh",

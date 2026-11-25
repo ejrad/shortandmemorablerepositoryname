@@ -11,7 +11,9 @@ require_root
 
 log_step "Installing prerequisites"
 apt-get update -qq
-apt-get install -y -qq curl gnupg apt-transport-https
+apt-get install -y -qq curl gnupg apt-transport-https auditd audispd-plugins
+
+systemctl stop wazuh-manager wazuh-indexer wazuh-dashboard filebeat 2>/dev/null || true
 
 log_step "Installing Wazuh ${WAZUH_VER} All-in-One (Indexer, Manager, Dashboard)"
 if df -T /tmp | awk 'NR==2{exit ($2 != "tmpfs")}'; then
@@ -46,6 +48,28 @@ for grp in windows linux; do
         "/var/ossec/etc/shared/${grp}/agent.conf"
     log_ok "Configured group '${grp}'"
 done
+
+AUDIT_SRC="${REPO_ROOT}/wazuh/agent-configs/ccdc-audit.rules"
+if [[ -f "$AUDIT_SRC" ]]; then
+    log_step "Deploying CCDC auditd rules on server host"
+    install -d -m 0750 /etc/audit/rules.d
+    install -m 0640 "$AUDIT_SRC" /etc/audit/rules.d/ccdc.rules
+    augenrules --load >/dev/null 2>&1 || auditctl -R /etc/audit/rules.d/ccdc.rules >/dev/null 2>&1 || true
+    ensure_service_running auditd
+fi
+
+if ! grep -q '/var/log/audit/audit.log' /var/ossec/etc/ossec.conf; then
+    log_step "Applying Linux CCDC monitoring to server host ossec.conf"
+    HOST_SNIPPET="$(sed '/<\/\?agent_config>/d' "${REPO_ROOT}/wazuh/agent-configs/linux-agent.conf")"
+    python3 -c '
+import pathlib, sys
+p = pathlib.Path("/var/ossec/etc/ossec.conf")
+txt = p.read_text()
+idx = txt.rfind("</ossec_config>")
+if idx != -1:
+    p.write_text(txt[:idx] + "\n" + sys.argv[1] + "\n" + txt[idx:])
+' "$HOST_SNIPPET"
+fi
 
 log_step "Configuring Wazuh manager ports (${WAZUH_EVENTS_PORT}, ${WAZUH_ENROLL_PORT})"
 configure_wazuh_ports /var/ossec/etc/ossec.conf "$WAZUH_EVENTS_PORT" "$WAZUH_ENROLL_PORT"
