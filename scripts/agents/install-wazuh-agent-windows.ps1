@@ -3,7 +3,7 @@
 param(
     [Parameter(Mandatory)][string]$ManagerIp,
     [string]$AgentGroup = 'windows',
-    [string]$WazuhMsiUrl = 'https://packages.wazuh.com/4.x/windows/wazuh-agent-4.9.2-1.msi',
+    [string]$WazuhMsiUrl = 'https://packages.wazuh.com/4.x/windows/wazuh-agent-4.14.10-1.msi',
     [string]$MsiPath,
     [switch]$InstallSysmon,
     [string]$SysmonExePath,

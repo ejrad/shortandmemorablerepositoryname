@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 source "${SCRIPT_DIR}/../lib/common.sh"
 
-WAZUH_VER="${1:-4.9}"
+WAZUH_VER="${1:-4.14}"
 
 require_root
 

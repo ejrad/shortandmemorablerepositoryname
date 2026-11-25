@@ -7,7 +7,7 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 
 MANAGER_IP="${1:-}"
 AGENT_GROUP="${2:-linux}"
-WAZUH_VER="${3:-4.9}"
+WAZUH_VER="${3:-4.14}"
 
 [[ -n "$MANAGER_IP" ]] || die "Usage: sudo bash $0 <MANAGER_IP> [AGENT_GROUP] [WAZUH_VERSION]"
 require_root

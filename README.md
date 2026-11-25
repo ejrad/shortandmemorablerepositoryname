@@ -37,7 +37,7 @@ sudo tar -O -xf wazuh-install-files.tar wazuh-install-files/wazuh-passwords.txt 
 
 Change dashboard `admin` password (requires upper, lower, number, and a symbol from `.*+?-`):
 ```bash
-curl -sO https://packages.wazuh.com/4.9/wazuh-passwords-tool.sh && sudo bash wazuh-passwords-tool.sh -u admin -p '!XXXXXXXXXXXXXXXXXX!'
+curl -sO https://packages.wazuh.com/4.14/wazuh-passwords-tool.sh && sudo bash wazuh-passwords-tool.sh -u admin -p '!XXXXXXXXXXXXXXXXXX!'
 ```
 
 Check server services & connected agents:
