@@ -180,9 +180,15 @@
     <group>web,attack,ccdc_high,</group>
   </rule>
 
-  <rule id="102017" level="10" frequency="10" timeframe="30">
+  <rule id="102017" level="4">
     <if_group>firewall|syslog</if_group>
     <match type="pcre2">(\[UFW BLOCK\]|FINAL_REJECT:|_DROP|_REJECT)</match>
+    <description>CCDC Linux: Firewall blocked packet from $(srcip)</description>
+    <group>firewall,recon,</group>
+  </rule>
+
+  <rule id="102019" level="10" frequency="10" timeframe="30">
+    <if_matched_sid>102017</if_matched_sid>
     <same_source_ip />
     <description>CCDC Linux: Port scan or blocked probe burst from $(srcip)</description>
     <mitre>
