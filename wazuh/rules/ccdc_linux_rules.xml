@@ -90,7 +90,7 @@
 
   <rule id="102009" level="11">
     <if_group>audit|syslog</if_group>
-    <match type="pcre2">(?i)(/dev/tcp/|bash\s+-i|nc\s+-e|ncat\s+-e|curl.*\|\s*(ba)?sh|wget.*\|\s*(ba)?sh)</match>
+    <match type="pcre2">(?i)(/dev/tcp/|(\bsh|\bbash)\b.*-i|\b(nc|ncat)\b.*-e|\bsocat\b.*exec:|curl.*\|\s*(ba)?sh|wget.*\|\s*(ba)?sh)</match>
     <description>CCDC Linux: Reverse shell or piped payload execution detected</description>
     <mitre>
       <id>T1059.004</id>
@@ -188,6 +188,17 @@
       <id>T1046</id>
     </mitre>
     <group>recon,portscan,ccdc_medium,</group>
+  </rule>
+
+  <rule id="102018" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.ppid_comm" type="pcre2">^(nc|ncat|netcat|socat|python|python3|perl|php|ruby)$</field>
+    <field name="audit.comm" type="pcre2">^(sh|bash|dash|zsh)$</field>
+    <description>CCDC Linux Audit: Possible reverse shell ($(audit.ppid_comm) -> $(audit.comm))</description>
+    <mitre>
+      <id>T1059</id>
+    </mitre>
+    <group>audit,c2,execution,ccdc_high,</group>
   </rule>
 
 </group>
