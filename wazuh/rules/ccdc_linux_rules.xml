@@ -125,7 +125,7 @@
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^(shadow_read|suid_priv|ccdc_exec)$</field>
     <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|chage|passwd|wazuh-modulesd)$</field>
-    <match type="pcre2">(chmod\s+[u\+]*s|setcap|find\s+.*-perm\s+-4000|/etc/shadow)</match>
+    <match type="pcre2">(chmod\b.*-?[u\+]*s|setcap\b|find\b.*-perm.*-4000|/etc/shadow)</match>
     <description>CCDC Linux Audit: SUID/capability abuse or /etc/shadow access</description>
     <mitre>
       <id>T1548.001</id>
@@ -137,7 +137,7 @@
   <rule id="102013" level="7">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <match type="pcre2">\b(whoami|uname\s+-a|cat\s+/etc/passwd|ss\s+-|netstat\s+-)\b</match>
+    <match type="pcre2">\b(whoami|uname\b.*-a|cat\b.*/etc/passwd|ss\b.*-|netstat\b.*-)</match>
     <description>CCDC Linux Audit: Host discovery command executed</description>
     <mitre>
       <id>T1082</id>
@@ -149,7 +149,7 @@
   <rule id="102014" level="10">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <match type="pcre2">\b(mysqldump|pg_dump|7z\s+a|tar\s+-c)\b</match>
+    <match type="pcre2">\b(mysqldump|pg_dump|7z\b.*a|tar\b.*-c)</match>
     <description>CCDC Linux Audit: Database dump or archive staging executed</description>
     <mitre>
       <id>T1560</id>
