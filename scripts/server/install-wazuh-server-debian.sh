@@ -26,6 +26,7 @@ curl -sO --output-dir "$TMP_DIR" "https://packages.wazuh.com/${WAZUH_VER}/wazuh-
 if ! apt-cache show software-properties-common >/dev/null 2>&1; then
     sed -i 's/software-properties-common//g' "${TMP_DIR}/wazuh-install.sh"
 fi
+sed -i -E "s/\b1514\b/${WAZUH_EVENTS_PORT}/g; s/\b1515\b/${WAZUH_ENROLL_PORT}/g" "${TMP_DIR}/wazuh-install.sh"
 bash "${TMP_DIR}/wazuh-install.sh" -a -o -i
 
 log_step "Deploying CCDC custom rules"
@@ -45,17 +46,21 @@ for grp in windows linux; do
     log_ok "Configured group '${grp}'"
 done
 
+log_step "Configuring Wazuh manager ports (${WAZUH_EVENTS_PORT}, ${WAZUH_ENROLL_PORT})"
+configure_wazuh_ports /var/ossec/etc/ossec.conf "$WAZUH_EVENTS_PORT" "$WAZUH_ENROLL_PORT"
+
 log_step "Validating Wazuh manager configuration & rules"
 /var/ossec/bin/wazuh-analysisd -t || die "wazuh-analysisd config/rule test failed!"
 
+systemctl restart wazuh-manager
 ensure_service_running wazuh-manager
 ensure_service_running wazuh-indexer
 ensure_service_running wazuh-dashboard
 
 if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
     log_step "Opening Wazuh ports in UFW"
-    ufw allow 1514/tcp >/dev/null
-    ufw allow 1515/tcp >/dev/null
+    ufw allow "${WAZUH_EVENTS_PORT}/tcp" >/dev/null
+    ufw allow "${WAZUH_ENROLL_PORT}/tcp" >/dev/null
     ufw allow 443/tcp >/dev/null
 fi
 

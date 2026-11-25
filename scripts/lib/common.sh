@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+WAZUH_EVENTS_PORT="${WAZUH_EVENTS_PORT:-51514}"
+WAZUH_ENROLL_PORT="${WAZUH_ENROLL_PORT:-51515}"
+
 log_step() { printf '\n==> %s\n' "$1"; }
 log_ok()   { printf '[OK] %s\n' "$1"; }
 log_warn() { printf '[WARN] %s\n' "$1" >&2; }
@@ -43,4 +46,23 @@ ensure_service_running() {
         journalctl -u "$svc" -n 25 --no-pager >&2 || true
         die "Service $svc failed to start."
     fi
+}
+
+configure_wazuh_ports() {
+    local conf="${1:-/var/ossec/etc/ossec.conf}"
+    local events_port="${2:-$WAZUH_EVENTS_PORT}"
+    local enroll_port="${3:-$WAZUH_ENROLL_PORT}"
+    [[ -f "$conf" ]] || die "Wazuh config not found: $conf"
+
+    sed -i -E "s|<port>1514</port>|<port>${events_port}</port>|g; s|<port>1515</port>|<port>${enroll_port}</port>|g" "$conf"
+
+    # Agent ossec.conf omits <enrollment><port> by default; add it if missing
+    if grep -q '<client>' "$conf" && ! grep -q "<port>${enroll_port}</port>" "$conf"; then
+        if grep -q '<enrollment>' "$conf"; then
+            sed -i "s|<enrollment>|<enrollment>\n      <port>${enroll_port}</port>|" "$conf"
+        else
+            sed -i "s|</client>|    <enrollment>\n      <port>${enroll_port}</port>\n    </enrollment>\n  </client>|" "$conf"
+        fi
+    fi
+    log_ok "Configured Wazuh ports in ${conf} (events=${events_port}, enroll=${enroll_port})."
 }

@@ -3,6 +3,7 @@
 ## 1. Debian Server Host (`dist/wazuh-server-debian.tar.gz`)
 
 ```bash
+curl -fSLO https://raw.githubusercontent.com/ejrad/shortandmemorablerepositoryname/main/dist/wazuh-server-debian.tar.gz
 tar -xzf wazuh-server-debian.tar.gz
 sudo bash scripts/server/install-wazuh-server-debian.sh
 ```
@@ -12,6 +13,7 @@ Dashboard: `https://<DEBIAN_SERVER_IP>`
 ## 2. Linux Endpoints (`dist/wazuh-agent-linux.tar.gz`)
 
 ```bash
+curl -fSLO https://raw.githubusercontent.com/ejrad/shortandmemorablerepositoryname/main/dist/wazuh-agent-linux.tar.gz
 tar -xzf wazuh-agent-linux.tar.gz
 sudo bash scripts/agents/install-wazuh-agent-linux.sh <DEBIAN_SERVER_IP>
 ```
@@ -20,6 +22,7 @@ sudo bash scripts/agents/install-wazuh-agent-linux.sh <DEBIAN_SERVER_IP>
 
 Elevated PowerShell:
 ```powershell
+curl.exe -fSLO https://raw.githubusercontent.com/ejrad/shortandmemorablerepositoryname/main/dist/wazuh-agent-windows.tar.gz
 tar -xzf wazuh-agent-windows.tar.gz
 Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\agents\install-wazuh-agent-windows.ps1 -ManagerIp <DEBIAN_SERVER_IP> -InstallSysmon
@@ -32,9 +35,9 @@ Find generated dashboard `admin` password:
 sudo tar -O -xf wazuh-install-files.tar wazuh-install-files/wazuh-passwords.txt | grep -A 2 "'admin'"
 ```
 
-Change dashboard `admin` password:
+Change dashboard `admin` password (requires upper, lower, number, and a symbol from `.*+?-`):
 ```bash
-curl -sO https://packages.wazuh.com/4.9/wazuh-passwords-tool.sh && sudo bash wazuh-passwords-tool.sh -u admin -p '<NEW_PASSWORD>'
+curl -sO https://packages.wazuh.com/4.9/wazuh-passwords-tool.sh && sudo bash wazuh-passwords-tool.sh -u admin -p '!XXXXXXXXXXXXXXXXXX!'
 ```
 
 Check server services & connected agents:

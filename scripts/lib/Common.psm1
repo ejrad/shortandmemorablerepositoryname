@@ -48,4 +48,33 @@ function Restart-ServiceSafe {
     Write-Ok "Service '$Name' is running."
 }
 
-Export-ModuleMember -Function Write-Step, Write-Ok, Test-TcpPort, Set-FirewallAllowRule, Restart-ServiceSafe
+function Set-WazuhAgentPorts {
+    param(
+        [string]$ConfigPath = 'C:\Program Files (x86)\ossec-agent\ossec.conf',
+        [int]$EventsPort = 51514,
+        [int]$EnrollPort = 51515
+    )
+    if (-not (Test-Path $ConfigPath)) { throw "Wazuh agent config not found: $ConfigPath" }
+    [xml]$xml = Get-Content -Path $ConfigPath -Raw
+    $client = $xml.ossec_config.client
+    if ($client.server) {
+        if (-not $client.server.port) {
+            $p = $xml.CreateElement('port')
+            $client.server.AppendChild($p) | Out-Null
+        }
+        $client.server.port = [string]$EventsPort
+    }
+    if (-not $client.enrollment) {
+        $enr = $xml.CreateElement('enrollment')
+        $client.AppendChild($enr) | Out-Null
+    }
+    if (-not $client.enrollment.port) {
+        $ep = $xml.CreateElement('port')
+        $client.enrollment.AppendChild($ep) | Out-Null
+    }
+    $client.enrollment.port = [string]$EnrollPort
+    $xml.Save($ConfigPath)
+    Write-Ok "Configured Wazuh agent ports (events=$EventsPort, enroll=$EnrollPort)."
+}
+
+Export-ModuleMember -Function Write-Step, Write-Ok, Test-TcpPort, Set-FirewallAllowRule, Restart-ServiceSafe, Set-WazuhAgentPorts

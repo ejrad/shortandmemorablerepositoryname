@@ -6,7 +6,9 @@ param(
     [string]$WazuhMsiUrl = 'https://packages.wazuh.com/4.x/windows/wazuh-agent-4.9.2-1.msi',
     [string]$MsiPath,
     [switch]$InstallSysmon,
-    [string]$SysmonExePath
+    [string]$SysmonExePath,
+    [int]$EventsPort = 51514,
+    [int]$EnrollPort = 51515
 )
 
 $ErrorActionPreference = 'Stop'
@@ -14,8 +16,8 @@ $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot '..\lib\Common.psm1') -Force
 
 Write-Step "Checking connectivity to Wazuh Manager ($ManagerIp)"
-Test-TcpPort -TargetHost $ManagerIp -Port 1514 | Out-Null
-Test-TcpPort -TargetHost $ManagerIp -Port 1515 | Out-Null
+Test-TcpPort -TargetHost $ManagerIp -Port $EventsPort | Out-Null
+Test-TcpPort -TargetHost $ManagerIp -Port $EnrollPort | Out-Null
 
 if (-not $MsiPath) {
     $MsiPath = Join-Path $env:TEMP 'wazuh-agent.msi'
@@ -49,6 +51,7 @@ if ($InstallSysmon) {
     Write-Ok 'Sysmon installed.'
 }
 
-Write-Step 'Starting WazuhSvc'
+Write-Step 'Configuring agent ports and starting WazuhSvc'
+Set-WazuhAgentPorts -EventsPort $EventsPort -EnrollPort $EnrollPort
 Restart-ServiceSafe -Name 'WazuhSvc'
 Write-Ok "Windows endpoint enrolled to $ManagerIp (group: $AgentGroup)."

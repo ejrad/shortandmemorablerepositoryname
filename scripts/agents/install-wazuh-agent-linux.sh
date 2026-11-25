@@ -13,8 +13,8 @@ WAZUH_VER="${3:-4.9}"
 require_root
 
 log_step "Checking connectivity to Wazuh Manager (${MANAGER_IP})"
-check_tcp_reachable "$MANAGER_IP" 1514 || true
-check_tcp_reachable "$MANAGER_IP" 1515 || true
+check_tcp_reachable "$MANAGER_IP" "$WAZUH_EVENTS_PORT" || true
+check_tcp_reachable "$MANAGER_IP" "$WAZUH_ENROLL_PORT" || true
 
 PKG_MGR="$(detect_pkg_manager)"
 log_step "Installing auditd and Wazuh ${WAZUH_VER} agent (${PKG_MGR})"
@@ -51,6 +51,7 @@ if [[ -f "$AUDIT_SRC" ]]; then
     ensure_service_running auditd
 fi
 
-log_step "Starting and enabling wazuh-agent"
+log_step "Configuring agent ports and starting wazuh-agent"
+configure_wazuh_ports /var/ossec/etc/ossec.conf "$WAZUH_EVENTS_PORT" "$WAZUH_ENROLL_PORT"
 ensure_service_running wazuh-agent
 log_ok "Linux endpoint enrolled to ${MANAGER_IP} (group: ${AGENT_GROUP})."
