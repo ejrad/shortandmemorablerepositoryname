@@ -54,4 +54,9 @@ fi
 log_step "Configuring agent ports and starting wazuh-agent"
 configure_wazuh_ports /var/ossec/etc/ossec.conf "$WAZUH_EVENTS_PORT" "$WAZUH_ENROLL_PORT"
 ensure_service_running wazuh-agent
+if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
+    ufw logging on >/dev/null
+elif command -v firewall-cmd >/dev/null 2>&1 && systemctl is-active --quiet firewalld; then
+    firewall-cmd --set-log-denied=all >/dev/null 2>&1 || true
+fi
 log_ok "Linux endpoint enrolled to ${MANAGER_IP} (group: ${AGENT_GROUP})."

@@ -124,7 +124,7 @@
   <rule id="102012" level="12">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^(shadow_read|suid_priv|ccdc_exec)$</field>
-    <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|chage|passwd)$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|chage|passwd|wazuh-modulesd)$</field>
     <match type="pcre2">(chmod\s+[u\+]*s|setcap|find\s+.*-perm\s+-4000|/etc/shadow)</match>
     <description>CCDC Linux Audit: SUID/capability abuse or /etc/shadow access</description>
     <mitre>
@@ -177,6 +177,17 @@
       <id>T1190</id>
     </mitre>
     <group>web,attack,ccdc_high,</group>
+  </rule>
+
+  <rule id="102017" level="10" frequency="10" timeframe="30">
+    <if_group>firewall|syslog</if_group>
+    <match type="pcre2">(\[UFW BLOCK\]|FINAL_REJECT:|_DROP|_REJECT)</match>
+    <same_source_ip />
+    <description>CCDC Linux: Port scan or blocked probe burst from $(srcip)</description>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+    <group>recon,portscan,ccdc_medium,</group>
   </rule>
 
 </group>

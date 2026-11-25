@@ -1,5 +1,12 @@
 # CCDC Wazuh IDS
 
+## Ports
+- `51514/tcp` — Agent events (custom, replaces `1514`)
+- `51515/tcp` — Agent enrollment (custom, replaces `1515`)
+- `443/tcp` — Wazuh Dashboard
+
+*(Linux installers enable `ufw logging on` or `firewalld --set-log-denied=all` if active; for raw `iptables`, log drops with `--log-prefix "[UFW BLOCK] "` to trigger port-scan rule `102017`.)*
+
 ## 1. Debian Server Host (`dist/wazuh-server-debian.tar.gz`)
 
 ```bash

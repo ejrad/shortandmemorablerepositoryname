@@ -87,6 +87,7 @@ if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
     ufw allow "${WAZUH_EVENTS_PORT}/tcp" >/dev/null
     ufw allow "${WAZUH_ENROLL_PORT}/tcp" >/dev/null
     ufw allow 443/tcp >/dev/null
+    ufw logging on >/dev/null
 fi
 
 SERVER_IP="$(hostname -I | awk '{print $1}')"
