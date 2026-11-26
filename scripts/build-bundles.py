@@ -19,6 +19,7 @@ BUNDLES = {
         "wazuh/agent-configs/windows-agent.conf",
         "wazuh/agent-configs/linux-agent.conf",
         "wazuh/agent-configs/ccdc-audit.rules",
+        "wazuh/dashboards/ccdc-triage-dashboard.ndjson",
     ],
     "wazuh-agent-linux.tar.gz": [
         "scripts/agents/install-wazuh-agent-linux.sh",
