@@ -29,7 +29,7 @@ def find_browser() -> str:
     raise FileNotFoundError("Chrome or Edge executable not found for PDF export.")
 
 
-def parse_rules(xml_path: Path, tested: set[int], new_ids: set[int]) -> list[dict]:
+def parse_rules(xml_path: Path, tested: set[int], failed: set[int], new_ids: set[int]) -> list[dict]:
     root = ET.fromstring(f"<wrap>{xml_path.read_text(encoding='utf-8')}</wrap>")
     rows = []
     for r in root.iter("rule"):
@@ -38,8 +38,16 @@ def parse_rules(xml_path: Path, tested: set[int], new_ids: set[int]) -> list[dic
         desc = (r.findtext("description") or "").strip()
         mitre = [m.text.strip() for m in r.findall("mitre/id") if m.text]
         groups = [g.strip() for g in (r.findtext("group") or "").split(",") if g.strip()]
-        status = "TESTED" if rid in tested else ("NEW" if rid in new_ids else "UNTESTED")
-        rows.append({"id": rid, "level": lvl, "desc": desc, "mitre": mitre, "groups": groups, "status": status})
+        if rid in tested:
+            status = "TESTED"
+            result = "FAIL" if rid in failed else "PASS"
+        elif rid in new_ids:
+            status = "NEW"
+            result = ""
+        else:
+            status = "UNTESTED"
+            result = ""
+        rows.append({"id": rid, "level": lvl, "desc": desc, "mitre": mitre, "groups": groups, "status": status, "result": result})
     return rows
 
 
@@ -53,6 +61,14 @@ def status_badge(st: str) -> str:
     return f'<span class="badge {cls}">{st}</span>'
 
 
+def result_badge(res: str) -> str:
+    if res == "PASS":
+        return '<span class="badge res-pass">PASS</span>'
+    if res == "FAIL":
+        return '<span class="badge res-fail">FAIL</span>'
+    return '<span class="muted">—</span>'
+
+
 def render_section(title: str, rows: list[dict]) -> str:
     trs = []
     for r in rows:
@@ -62,15 +78,17 @@ def render_section(title: str, rows: list[dict]) -> str:
             f'<tr><td class="mono">{r["id"]}</td>'
             f'<td>{lvl_badge(r["level"])}</td>'
             f'<td>{status_badge(r["status"])}</td>'
+            f'<td>{result_badge(r["result"])}</td>'
             f'<td><strong>{html.escape(r["desc"])}</strong><div class="groups">{grp_html}</div></td>'
             f'<td>{mitre_html}</td></tr>'
         )
     return (
         f'<section><h2>{html.escape(title)} <span class="count">({len(rows)} rules)</span></h2>'
         f'<table><thead><tr>'
-        f'<th style="width:68px">Rule ID</th><th style="width:72px">Severity</th>'
-        f'<th style="width:88px">Status</th><th>Description &amp; Groups</th>'
-        f'<th style="width:120px">MITRE ATT&amp;CK</th></tr></thead>'
+        f'<th style="width:66px">Rule ID</th><th style="width:70px">Severity</th>'
+        f'<th style="width:84px">Status</th><th style="width:64px">Passed</th>'
+        f'<th>Description &amp; Groups</th>'
+        f'<th style="width:115px">MITRE ATT&amp;CK</th></tr></thead>'
         f'<tbody>{"".join(trs)}</tbody></table></section>'
     )
 
@@ -78,12 +96,13 @@ def render_section(title: str, rows: list[dict]) -> str:
 def main() -> None:
     status_data = json.loads(STATUS_PATH.read_text(encoding="utf-8"))
     tested = set(status_data.get("tested", []))
+    failed = set(status_data.get("failed", []))
     new_ids = set(status_data.get("new", []))
 
     rule_files = sorted(RULES_DIR.glob("*.xml"))
     all_rows, sections = [], []
     for path in rule_files:
-        rows = parse_rules(path, tested, new_ids)
+        rows = parse_rules(path, tested, failed, new_ids)
         all_rows.extend(rows)
         sections.append(render_section(path.name, rows))
 
@@ -92,18 +111,20 @@ def main() -> None:
     new_cnt = sum(1 for r in all_rows if r["status"] == "NEW")
     untested_cnt = sum(1 for r in all_rows if r["status"] == "UNTESTED")
 
+    new_kpi = f'<div class="kpi new"><div class="num">{new_cnt}</div><div class="lbl">New</div></div>' if new_cnt else ""
     kpis = (
         f'<div class="kpis">'
         f'<div class="kpi"><div class="num">{total}</div><div class="lbl">Total Rules</div></div>'
         f'<div class="kpi tested"><div class="num">{tested_cnt}</div><div class="lbl">Tested</div></div>'
-        f'<div class="kpi new"><div class="num">{new_cnt}</div><div class="lbl">New</div></div>'
+        f'{new_kpi}'
         f'<div class="kpi untested"><div class="num">{untested_cnt}</div><div class="lbl">Untested</div></div>'
         f'</div>'
     )
+    new_leg = '<span class="badge st-new">NEW</span> Added since last test. &nbsp; ' if new_cnt else ""
     legend = (
         '<div class="legend"><strong>Status Legend:</strong> '
         '<span class="badge st-tested">TESTED</span> Verified live. &nbsp; '
-        '<span class="badge st-new">NEW</span> Added since last test. &nbsp; '
+        f'{new_leg}'
         '<span class="badge st-untested">UNTESTED</span> Pending live test.</div>'
     )
 
