@@ -1,9 +1,52 @@
 {
-  "tested": [102001, 102002, 102005, 102006, 102008, 102009, 102010, 102012, 102013, 102014, 102017, 102018, 102019, 102021, 102022],
-  "failed": [102018, 102019],
+  "tested": [
+    102001,
+    102002,
+    102003,
+    102004,
+    102005,
+    102006,
+    102008,
+    102009,
+    102010,
+    102012,
+    102013,
+    102014,
+    102017,
+    102018,
+    102019,
+    102021,
+    102022,
+    102030,
+    102031,
+    102032,
+    102033,
+    102034,
+    102036,
+    102038
+  ],
+  "failed": [
+    102004,
+    102014,
+    102018,
+    102031,
+    102032,
+    102033
+  ],
   "plaus": {
     "102006": "FIM alert requires waiting for syscheckd baseline scan (>2s); test script ran touch + rm in 2s.",
-    "102010": "FIM alert requires /root/.ssh to exist before syscheckd baseline scan or waiting for next 300s sweep."
+    "102014": "Shadowed by 102038 (level 11) matching /etc/passwd in the tar command; fixing 102038 will restore 102014.",
+    "102030": "FIM alert requires /var/spool/cron to exist before syscheckd baseline scan (>2s); test ran touch + rm in 2s."
   },
-  "new": []
+  "new": [
+    102023,
+    102024,
+    102025,
+    102026,
+    102027,
+    102028,
+    102029,
+    102035,
+    102037
+  ]
 }
