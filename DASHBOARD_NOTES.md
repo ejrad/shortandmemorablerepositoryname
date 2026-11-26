@@ -22,7 +22,7 @@ For general Wazuh UI navigation, column setup, and DQL search filters, see [WAZU
 | **MITRE ATT&CK Techniques (IR)** | `rule.mitre.id` + `rule.description` (`rule.level >= 7`) | Copy-paste exact `Txxxx` technique IDs into Incident Reports. |
 | **Targeted / Used Accounts (IR)** | `data.dstuser` + `agent.name` (`rule.level >= 7`) | Identify compromised/targeted accounts for password resets & IRs. |
 | **Targeted / Outbound Ports** | `data.dstport` + `agent.name` + `data.srcip` (`data.dstport:*`) | Spot scanned ports and outbound C2 ports for firewall rules & IRs. |
-| **Suspicious Binaries & Processes (IR)** | `data.audit.exe` / `data.win.eventdata.image` (`rule.groups:ccdc_high`) | Grab exact binary/payload paths for containment & IR evidence. |
+| **Suspicious Binaries & Processes (IR)** | `data.audit.exe` + `rule.description` (`rule.groups:ccdc_high`) | Grab exact binary/payload paths for containment & IR evidence. |
 | **Live High-Severity Feed** | Full-width live stream (`rule.groups:ccdc_high OR rule.level>=10`) | Triage alert-by-alert; click **`>`** on any row to inspect `full_log`, `data.audit.exe`, `syscheck.path`, or `data.win.eventdata.commandLine`. |
 
 ## 3. Fast Triage Workflow (5-Second Loop)

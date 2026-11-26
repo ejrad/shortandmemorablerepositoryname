@@ -1,6 +1,8 @@
 # LARPMAXXING SUPREME
 
-![SOC Wizard](docs/soc-wizard.png)
+<p align="center">
+  <img src="docs/soc-wizard.png" alt="SOC Wizard" width="50%" />
+</p>
 
 <img src="docs/larp.jpg" alt="the more you larp, the less you larp" width="100%" />
 
