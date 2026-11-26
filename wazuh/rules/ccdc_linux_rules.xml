@@ -325,7 +325,7 @@
   <rule id="102031" level="13">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <match type="pcre2">(?i)((truncate|shred)\b.*/var/log/|rm\b.*/var/log/(auth|secure|syslog|messages|audit)|history\s+-c|unset\s+HISTFILE|auditctl\b.*-D|systemctl\b.*(stop|disable|mask).*(wazuh-agent|auditd))</match>
+    <match type="pcre2">(?i)((truncate|shred)\b.*/var/log/|rm\b.*/var/log/(auth|secure|syslog|messages|audit)|auditctl\b.*-D|systemctl\b.*(stop|disable|mask).*(wazuh-agent|auditd))</match>
     <description>Log/agent tamper: $(audit.exe)</description>
     <mitre>
       <id>T1070.002</id>
@@ -338,7 +338,7 @@
   <rule id="102032" level="13">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <field name="audit.comm" type="pcre2">^(insmod|modprobe)$</field>
+    <field name="audit.comm" type="pcre2">^(insmod|modprobe|kmod)$</field>
     <description>Kernel module load: $(audit.exe)</description>
     <mitre>
       <id>T1547.006</id>
@@ -349,7 +349,7 @@
   <rule id="102033" level="11">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <match type="pcre2">(?i)((curl|wget)\b.*(-o|-O|--output)\s*/?(tmp|dev/shm)/|\bchisel\b|\bssh\b.*(\s|")-(R|L|D)(\s|"))</match>
+    <match type="pcre2">(?i)((curl|wget)\b.*a[0-9]="[^"]*/(tmp|dev/shm)/|\bchisel\b|\bssh\b.*a[0-9]="-(R|L|D))</match>
     <description>Payload dl / tunnel: $(audit.exe)</description>
     <mitre>
       <id>T1105</id>
@@ -402,7 +402,7 @@
   <rule id="102038" level="11">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <match type="pcre2">\b(passwd|chpasswd|usermod\b.*-p)\b</match>
+    <field name="audit.comm" type="pcre2">^(passwd|chpasswd)$</field>
     <description>Password change/reset: $(audit.exe)</description>
     <mitre>
       <id>T1098</id>

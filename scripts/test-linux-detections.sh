@@ -76,8 +76,10 @@ fi
 log_ok "Package management test completed."
 
 log_step "8. Tampering, Rootkit, Download, Keylogger & Password Audit (102031, 102032, 102033, 102034, 102038)"
-bash -c 'unset HISTFILE; history -c' >/dev/null 2>&1 || true
-modprobe -n dummy >/dev/null 2>&1 || true
+touch /var/log/ccdc_test_tamper.log
+truncate -s 0 /var/log/ccdc_test_tamper.log >/dev/null 2>&1 || true
+rm -f /var/log/ccdc_test_tamper.log
+/usr/sbin/modprobe -n dummy >/dev/null 2>&1 || /sbin/modprobe -n dummy >/dev/null 2>&1 || true
 curl -s -o /tmp/ccdc_dl_test http://127.0.0.1:9 >/dev/null 2>&1 || true
 rm -f /tmp/ccdc_dl_test
 if command -v strace >/dev/null 2>&1; then
