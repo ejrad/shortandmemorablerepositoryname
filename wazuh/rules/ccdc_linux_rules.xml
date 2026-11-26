@@ -2,8 +2,8 @@
 
   
   <rule id="102001" level="10">
-    <if_group>syslog|sudo</if_group>
-    <match type="pcre2">(?i)(useradd|NOPASSWD|visudo|usermod\s+.*-aG\s+(sudo|wheel|admin))</match>
+    <if_group>syslog|sudo|audit</if_group>
+    <match type="pcre2">(?i)(useradd|NOPASSWD|visudo|usermod\b.*-aG\b.*(sudo|wheel|admin))</match>
     <description>CCDC Linux: Privilege escalation or user/sudoers modification detected</description>
     <mitre>
       <id>T1548.003</id>
@@ -48,7 +48,7 @@
 
   
   <rule id="102005" level="7">
-    <if_group>syslog</if_group>
+    <if_group>syslog|audit</if_group>
     <match type="pcre2">\b(apt|apt-get|yum|dnf|dpkg|rpm)\b.*(install|remove|purge|erase)</match>
     <description>CCDC Linux: Package management activity detected</description>
     <group>package_management,ccdc_low,</group>
@@ -80,6 +80,7 @@
   <rule id="102008" level="12">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">/usr/bin/mktemp$</field>
     <match type="pcre2">(exe="/(tmp|dev/shm|var/tmp)/|a[01]="/(tmp|dev/shm|var/tmp)/|memfd:|exe="[^"]*\(deleted\)")</match>
     <description>CCDC Linux Audit: Execution from temp/shm or deleted/memfd binary ($(audit.exe))</description>
     <mitre>
@@ -125,7 +126,7 @@
   <rule id="102012" level="12">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^(shadow_read|suid_priv|ccdc_exec)$</field>
-    <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|chage|passwd|wazuh-modulesd)$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|chage|passwd|wazuh-modulesd|wazuh-syscheckd|sshd-session|stat|useradd|userdel)$</field>
     <match type="pcre2">(chmod\b.*(\s|")(\+s|u\+s|[2467][0-7]{3})(\s|")|setcap\b|find\b.*-perm.*-4000|/etc/shadow)</match>
     <description>CCDC Linux Audit: SUID/capability abuse or /etc/shadow access</description>
     <mitre>
@@ -138,6 +139,7 @@
   <rule id="102013" level="7">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <field name="audit.cwd" type="pcre2" negate="yes">^/var/ossec$</field>
     <match type="pcre2">\b(whoami|uname\b.*-a|cat\b.*/etc/passwd|ss\b.*-|netstat\b.*-)</match>
     <description>CCDC Linux Audit: Host discovery command executed</description>
     <mitre>
@@ -199,7 +201,7 @@
 
   <rule id="102018" level="12">
     <if_group>audit</if_group>
-    <field name="audit.ppid_comm" type="pcre2">^(nc|ncat|netcat|socat|python|python3|perl|php|ruby)$</field>
+    <field name="audit.ppid_comm" type="pcre2">^(nc|ncat|netcat|socat|python[0-9.]*|perl|php|ruby)$</field>
     <field name="audit.comm" type="pcre2">^(sh|bash|dash|zsh)$</field>
     <description>CCDC Linux Audit: Possible reverse shell ($(audit.ppid_comm) -> $(audit.comm))</description>
     <mitre>
