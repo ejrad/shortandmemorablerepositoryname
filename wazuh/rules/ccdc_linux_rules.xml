@@ -244,4 +244,77 @@
     <group>audit,privilege_escalation,defense_evasion,ccdc_high,</group>
   </rule>
 
+  <rule id="102023" level="6">
+    <if_group>syslog|authentication_failed</if_group>
+    <program_name type="pcre2">^(vsftpd|proftpd)$</program_name>
+    <match type="pcre2">(FAIL LOGIN|Login failed|authentication failure|530 Login incorrect)</match>
+    <description>CCDC Linux: FTP authentication failure from $(srcip)</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failed,ftp,ccdc_med,</group>
+  </rule>
+
+  <rule id="102024" level="10" frequency="5" timeframe="30">
+    <if_matched_sid>102023</if_matched_sid>
+    <same_source_ip />
+    <description>CCDC Linux: FTP brute force detected from $(srcip)</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failures,ftp,ccdc_high,</group>
+  </rule>
+
+  <rule id="102025" level="6">
+    <if_group>syslog|authentication_failed</if_group>
+    <program_name type="pcre2">^(dovecot|postfix|saslauthd)</program_name>
+    <match type="pcre2">(auth failed|authentication failed|SASL .* authentication failed|Password mismatch)</match>
+    <description>CCDC Linux: Mail service authentication failure from $(srcip)</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failed,mail,ccdc_med,</group>
+  </rule>
+
+  <rule id="102026" level="10" frequency="5" timeframe="30">
+    <if_matched_sid>102025</if_matched_sid>
+    <same_source_ip />
+    <description>CCDC Linux: Mail service brute force detected from $(srcip)</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failures,mail,ccdc_high,</group>
+  </rule>
+
+  <rule id="102027" level="6">
+    <if_group>syslog|pam|authentication_failed</if_group>
+    <program_name type="pcre2">^cockpit</program_name>
+    <match type="pcre2">(authentication failure|Failed password|invalid user|Authentication failed)</match>
+    <description>CCDC Linux: Cockpit authentication failure from $(srcip)</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failed,cockpit,ccdc_med,</group>
+  </rule>
+
+  <rule id="102028" level="10" frequency="5" timeframe="30">
+    <if_matched_sid>102027</if_matched_sid>
+    <same_source_ip />
+    <description>CCDC Linux: Cockpit brute force detected from $(srcip)</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failures,cockpit,ccdc_high,</group>
+  </rule>
+
+  <rule id="102029" level="10">
+    <if_group>syscheck</if_group>
+    <field name="file" type="pcre2">^(/etc/aliases|/etc/postfix/virtual|/var/vmail/.*\.sieve|/home/[^/]+/\.forward)$</field>
+    <description>CCDC Linux FIM: Mail forwarding, Sieve, or aliases modified ($(file))</description>
+    <mitre>
+      <id>T1114.003</id>
+    </mitre>
+    <group>syscheck,persistence,mail,ccdc_high,</group>
+  </rule>
+
 </group>
