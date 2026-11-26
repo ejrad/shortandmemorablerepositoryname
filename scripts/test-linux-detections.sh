@@ -79,8 +79,8 @@ if pause_for_kali "Start a listener on Kali:  nc -lvnp 4444"; then
 fi
 
 pause_for_kali "Run SSH brute force & Nmap scan on Kali:
-  for i in {1..7}; do sshpass -p wrongpass ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=no fakeuser@${DEBIAN_IP} 2>/dev/null; done
-  nmap -p 1-50 ${DEBIAN_IP}" || true
+  hydra -l fakeuser -P /usr/share/wordlists/fasttrack.txt -t 4 -f ssh://${DEBIAN_IP}
+  nmap -Pn -p 1-50 ${DEBIAN_IP}" || true
 
 if [[ -f /etc/ssh/sshd_config ]]; then
     ORIG_PERMIT="$(grep -E '^#?PermitRootLogin' /etc/ssh/sshd_config | head -n1 || true)"
