@@ -133,6 +133,7 @@
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <field name="audit.cwd" type="pcre2" negate="yes">^/var/ossec$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">(wazuh-modulesd|wazuh-agentd|wazuh-syscheckd)$</field>
     <match type="pcre2">\b(whoami|uname\b.*-a|cat\b.*/etc/passwd|ss\b.*-|netstat\b.*-)</match>
     <description>Host discovery cmd</description>
     <mitre>
@@ -302,8 +303,8 @@
 
   <rule id="102029" level="10">
     <if_group>syscheck</if_group>
-    <field name="file" type="pcre2">^(/etc/aliases|/etc/postfix/virtual|/var/vmail/.*\.sieve|/home/[^/]+/\.forward)$</field>
-    <description>FIM mail fwd/alias: $(file)</description>
+    <field name="syscheck.path" type="pcre2">^(/etc/aliases|/etc/postfix/virtual|/var/vmail/.*\.sieve|/home/[^/]+/\.forward)$</field>
+    <description>FIM mail fwd/alias: $(syscheck.path)</description>
     <mitre>
       <id>T1114.003</id>
     </mitre>
@@ -386,6 +387,27 @@
       <id>T1014</id>
     </mitre>
     <group>rootcheck,rootkit,ccdc_high,</group>
+  </rule>
+
+  <rule id="102037" level="12" frequency="5" timeframe="60">
+    <if_matched_sid>102016</if_matched_sid>
+    <same_source_ip />
+    <description>Web attack burst: $(srcip)</description>
+    <mitre>
+      <id>T1190</id>
+    </mitre>
+    <group>web,attack,ccdc_high,</group>
+  </rule>
+
+  <rule id="102038" level="11">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <match type="pcre2">\b(passwd|chpasswd|usermod\b.*-p)\b</match>
+    <description>Password change/reset: $(audit.exe)</description>
+    <mitre>
+      <id>T1098</id>
+    </mitre>
+    <group>audit,persistence,account_manipulation,ccdc_high,</group>
   </rule>
 
 </group>
