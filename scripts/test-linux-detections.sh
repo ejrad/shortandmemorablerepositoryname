@@ -43,14 +43,16 @@ log_step "3. Parent -> Shell Reverse Shell Pattern (102018)"
 python3 -c 'import subprocess; subprocess.run(["/bin/sh", "-c", "id >/dev/null"])'
 log_ok "Parent->shell test completed."
 
-log_step "4. Persistence, su to root & Account Manipulation (102001, 102004, 102006, 102010)"
+log_step "4. Persistence, su to root & Account Manipulation (102001, 102004, 102006, 102010, 102030)"
 su - root -c "id >/dev/null" 2>/dev/null || true
 touch /etc/cron.d/redteam_test
 useradd testred 2>/dev/null || true
 mkdir -p /root/.ssh
 touch /root/.ssh/authorized_keys
+mkdir -p /var/spool/cron
+touch /var/spool/cron/redteam_test
 sleep 2
-rm -f /etc/cron.d/redteam_test
+rm -f /etc/cron.d/redteam_test /var/spool/cron/redteam_test
 userdel testred 2>/dev/null || true
 find /root/.ssh -maxdepth 1 -name authorized_keys -empty -delete 2>/dev/null || true
 log_ok "Persistence & user tests completed and cleaned up."
@@ -72,6 +74,19 @@ if command -v apt-get >/dev/null 2>&1; then
     apt-get install -y -qq sl >/dev/null 2>&1 && apt-get remove -y -qq sl >/dev/null 2>&1 || true
 fi
 log_ok "Package management test completed."
+
+log_step "8. Tampering, Rootkit, Download, Keylogger & Password Audit (102031, 102032, 102033, 102034, 102038)"
+bash -c 'unset HISTFILE; history -c' >/dev/null 2>&1 || true
+modprobe -n dummy >/dev/null 2>&1 || true
+curl -s -o /tmp/ccdc_dl_test http://127.0.0.1:9 >/dev/null 2>&1 || true
+rm -f /tmp/ccdc_dl_test
+if command -v strace >/dev/null 2>&1; then
+    strace -p 999999 >/dev/null 2>&1 || true
+else
+    ls /dev/input/event0 >/dev/null 2>&1 || true
+fi
+passwd -S root >/dev/null 2>&1 || true
+log_ok "Tampering, LKM, download, keylogger, and password audit tests completed."
 
 if pause_for_kali "Start a listener on Kali:  nc -lvnp 4444"; then
     log_step "8. Reverse Shell Test (102009)"
