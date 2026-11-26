@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{TITLE}}</title>
+<style>
+  @page { size: letter; margin: 0.55in 0.55in 0.6in 0.55in; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #1e293b;
+    font-size: 10.5px;
+    line-height: 1.4;
+    margin: 0;
+  }
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: #ffffff;
+    padding: 20px 24px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  header h1 { margin: 0 0 4px 0; font-size: 20px; letter-spacing: 0.3px; }
+  header p { margin: 0; color: #cbd5e1; font-size: 11px; }
+  .kpis { display: flex; gap: 10px; margin-bottom: 18px; }
+  .kpi {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-top: 3px solid #1e3a8a;
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .kpi.tested { border-top-color: #16a34a; }
+  .kpi.new { border-top-color: #2563eb; }
+  .kpi.untested { border-top-color: #d97706; }
+  .kpi .num { font-size: 20px; font-weight: 700; color: #0f172a; }
+  .kpi .lbl { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
+  h2 {
+    font-size: 13px;
+    color: #0f172a;
+    border-bottom: 2px solid #1e3a8a;
+    padding-bottom: 4px;
+    margin: 18px 0 8px 0;
+    page-break-after: avoid;
+  }
+  h2 .count { color: #64748b; font-weight: 400; font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  th {
+    background: #0f172a;
+    color: #f8fafc;
+    text-align: left;
+    padding: 6px 8px;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  tr { page-break-inside: avoid; }
+  .mono { font-family: Consolas, monospace; font-weight: 700; color: #0f172a; }
+  .groups { color: #64748b; font-size: 9px; margin-top: 2px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .lvl-crit { background: #fee2e2; color: #991b1b; }
+  .lvl-high { background: #ffedd5; color: #9a3412; }
+  .lvl-med  { background: #fef9c3; color: #854d0e; }
+  .lvl-low  { background: #e2e8f0; color: #334155; }
+  .st-tested   { background: #dcfce7; color: #166534; }
+  .st-new      { background: #dbeafe; color: #1e40af; }
+  .st-untested { background: #fef3c7; color: #92400e; }
+  .tag {
+    display: inline-block;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-family: Consolas, monospace;
+    font-size: 8.5px;
+    margin: 1px 2px 1px 0;
+  }
+  .muted { color: #94a3b8; }
+  .legend {
+    font-size: 9.5px;
+    color: #475569;
+    margin-bottom: 14px;
+    background: #f1f5f9;
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>{{TITLE}}</h1>
+    <p>{{SUBTITLE}}</p>
+  </header>
+  {{KPI_CARDS}}
+  {{LEGEND}}
+  {{SECTIONS}}
+</body>
+</html>

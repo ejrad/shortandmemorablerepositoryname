@@ -126,7 +126,7 @@
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^(shadow_read|suid_priv|ccdc_exec)$</field>
     <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|chage|passwd|wazuh-modulesd)$</field>
-    <match type="pcre2">(chmod\b.*-?[u\+]*s|setcap\b|find\b.*-perm.*-4000|/etc/shadow)</match>
+    <match type="pcre2">(chmod\b.*(\s|")(\+s|u\+s|[2467][0-7]{3})(\s|")|setcap\b|find\b.*-perm.*-4000|/etc/shadow)</match>
     <description>CCDC Linux Audit: SUID/capability abuse or /etc/shadow access</description>
     <mitre>
       <id>T1548.001</id>
@@ -206,6 +206,40 @@
       <id>T1059</id>
     </mitre>
     <group>audit,c2,execution,ccdc_high,</group>
+  </rule>
+
+  <rule id="102020" level="13">
+    <if_group>syscheck</if_group>
+    <field name="syscheck.path" type="pcre2">^(/bin/|/sbin/|/usr/bin/|/usr/sbin/)</field>
+    <description>CCDC Linux FIM: System binary modified or replaced ($(syscheck.path))</description>
+    <mitre>
+      <id>T1036</id>
+    </mitre>
+    <group>syscheck,persistence,ccdc_high,</group>
+  </rule>
+
+  <rule id="102021" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <match type="pcre2">(systemctl\b.*(\s|")(stop|disable|mask)(\s|")|iptables\b.*(\s|")(-F|-P.*DROP|-A.*(DROP|REJECT))(\s|")|ufw\b.*(\s|")disable(\s|"))</match>
+    <description>CCDC Linux Audit: Service or firewall tampering ($(audit.exe))</description>
+    <mitre>
+      <id>T1489</id>
+      <id>T1562.004</id>
+    </mitre>
+    <group>audit,impact,defense_evasion,ccdc_high,</group>
+  </rule>
+
+  <rule id="102022" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <match type="pcre2">(exe="/usr/bin/pkexec"|/(tmp|var|home|opt|etc)/\.[a-zA-Z0-9_-]+/)</match>
+    <description>CCDC Linux Audit: pkexec privesc or hidden dot-directory execution ($(audit.exe))</description>
+    <mitre>
+      <id>T1068</id>
+      <id>T1564.001</id>
+    </mitre>
+    <group>audit,privilege_escalation,defense_evasion,ccdc_high,</group>
   </rule>
 
 </group>
