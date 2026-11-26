@@ -91,7 +91,7 @@
 
   <rule id="102009" level="11">
     <if_group>audit|syslog</if_group>
-    <match type="pcre2">(?i)(/dev/tcp/|(\bsh|\bbash)\b.*-i|\b(nc|ncat)\b.*-e|\bsocat\b.*exec:|curl.*\|\s*(ba)?sh|wget.*\|\s*(ba)?sh)</match>
+    <match type="pcre2">(?i)(/dev/tcp/|(\bsh|\bbash)\b.*(\s|")-i(\s|"|$)|\b(nc|ncat)\b.*(\s|")-e(\s|"|$)|\bsocat\b.*exec:|curl.*\|\s*(ba)?sh|wget.*\|\s*(ba)?sh)</match>
     <description>CCDC Linux: Reverse shell or piped payload execution detected</description>
     <mitre>
       <id>T1059.004</id>
