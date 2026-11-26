@@ -310,4 +310,82 @@
     <group>syscheck,persistence,mail,ccdc_high,</group>
   </rule>
 
+  <rule id="102030" level="12">
+    <if_group>syscheck</if_group>
+    <field name="syscheck.path" type="pcre2">^(/root/\.bash(rc|_profile)|/root/\.profile|/home/[^/]+/(\.bash(rc|_profile)|\.profile|\.config/systemd/user/)|/var/spool/cron/)</field>
+    <description>FIM user persist: $(syscheck.path)</description>
+    <mitre>
+      <id>T1546.004</id>
+      <id>T1053.003</id>
+    </mitre>
+    <group>syscheck,persistence,ccdc_high,</group>
+  </rule>
+
+  <rule id="102031" level="13">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <match type="pcre2">(?i)((truncate|shred)\b.*/var/log/|rm\b.*/var/log/(auth|secure|syslog|messages|audit)|history\s+-c|unset\s+HISTFILE|auditctl\b.*-D|systemctl\b.*(stop|disable|mask).*(wazuh-agent|auditd))</match>
+    <description>Log/agent tamper: $(audit.exe)</description>
+    <mitre>
+      <id>T1070.002</id>
+      <id>T1070.003</id>
+      <id>T1562.001</id>
+    </mitre>
+    <group>audit,defense_evasion,ccdc_high,</group>
+  </rule>
+
+  <rule id="102032" level="13">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <field name="audit.comm" type="pcre2">^(insmod|modprobe)$</field>
+    <description>Kernel module load: $(audit.exe)</description>
+    <mitre>
+      <id>T1547.006</id>
+    </mitre>
+    <group>audit,persistence,rootkit,ccdc_high,</group>
+  </rule>
+
+  <rule id="102033" level="11">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <match type="pcre2">(?i)((curl|wget)\b.*(-o|-O|--output)\s*/?(tmp|dev/shm)/|\bchisel\b|\bssh\b.*(\s|")-(R|L|D)(\s|"))</match>
+    <description>Payload dl / tunnel: $(audit.exe)</description>
+    <mitre>
+      <id>T1105</id>
+      <id>T1021.004</id>
+      <id>T1572</id>
+    </mitre>
+    <group>audit,c2,lateral_movement,ccdc_high,</group>
+  </rule>
+
+  <rule id="102034" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <match type="pcre2">(?i)((strace|ltrace|gdb)\b.*(\s|")-p(\s|")|/dev/input/event|\blogkeys\b|pam_tty_audit)</match>
+    <description>Keylogger / ptrace sniff: $(audit.exe)</description>
+    <mitre>
+      <id>T1056.001</id>
+    </mitre>
+    <group>audit,credential_access,ccdc_high,</group>
+  </rule>
+
+  <rule id="102035" level="10">
+    <if_group>syslog</if_group>
+    <match type="pcre2">entered promiscuous mode</match>
+    <description>Promiscuous sniffer mode</description>
+    <mitre>
+      <id>T1040</id>
+    </mitre>
+    <group>network,credential_access,ccdc_high,</group>
+  </rule>
+
+  <rule id="102036" level="13">
+    <if_group>rootcheck</if_group>
+    <description>Rootcheck anomaly</description>
+    <mitre>
+      <id>T1014</id>
+    </mitre>
+    <group>rootcheck,rootkit,ccdc_high,</group>
+  </rule>
+
 </group>
