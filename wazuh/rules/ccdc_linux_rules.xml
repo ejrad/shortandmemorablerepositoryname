@@ -1,10 +1,9 @@
 <group name="ccdc,linux,">
 
-  
   <rule id="102001" level="10">
     <if_group>syslog|sudo|audit</if_group>
     <match type="pcre2">(?i)(useradd|NOPASSWD|visudo|usermod\b.*-aG\b.*(sudo|wheel|admin))</match>
-    <description>CCDC Linux: Privilege escalation or user/sudoers modification detected</description>
+    <description>User/sudoers privesc</description>
     <mitre>
       <id>T1548.003</id>
       <id>T1136.001</id>
@@ -12,22 +11,20 @@
     <group>privilege_escalation,ccdc_high,</group>
   </rule>
 
-  
   <rule id="102002" level="12" frequency="5" timeframe="120">
     <if_matched_sid>5710</if_matched_sid>
     <same_source_ip />
-    <description>CCDC Linux: SSH brute force attack from $(srcip)</description>
+    <description>SSH brute force: $(srcip)</description>
     <mitre>
       <id>T1110</id>
     </mitre>
     <group>sshd,bruteforce,ccdc_high,</group>
   </rule>
 
-  
   <rule id="102003" level="12">
-    <if_sid>5715</if_sid>
+    <if_sid>5715,40112</if_sid>
     <match type="pcre2">Accepted\s+.*\s+for\s+root\b</match>
-    <description>CCDC Linux: Successful root login via SSH from $(srcip)</description>
+    <description>SSH root login: $(srcip)</description>
     <mitre>
       <id>T1078.003</id>
       <id>T1021.004</id>
@@ -35,30 +32,27 @@
     <group>sshd,authentication_success,ccdc_high,</group>
   </rule>
 
-  
   <rule id="102004" level="10">
     <if_group>syslog</if_group>
     <match type="pcre2">Successful su for root</match>
-    <description>CCDC Linux: Interactive su to root detected</description>
+    <description>su to root</description>
     <mitre>
       <id>T1548</id>
     </mitre>
     <group>privilege_escalation,ccdc_high,</group>
   </rule>
 
-  
   <rule id="102005" level="7">
     <if_group>syslog|audit</if_group>
     <match type="pcre2">\b(apt|apt-get|yum|dnf|dpkg|rpm)\b.*(install|remove|purge|erase)</match>
-    <description>CCDC Linux: Package management activity detected</description>
+    <description>Package install/remove</description>
     <group>package_management,ccdc_low,</group>
   </rule>
 
-  
   <rule id="102006" level="12">
     <if_group>syscheck</if_group>
     <field name="syscheck.path" type="pcre2">^(/etc/(passwd|shadow|group|sudoers|sudoers\.d/|ssh/sshd_config|cron)|/root/\.ssh/|/etc/systemd/system/)</field>
-    <description>CCDC Linux FIM: Critical system/auth/persistence file modified ($(syscheck.path))</description>
+    <description>FIM auth/persist: $(syscheck.path)</description>
     <mitre>
       <id>T1098</id>
       <id>T1543.002</id>
@@ -66,11 +60,10 @@
     <group>syscheck,persistence,ccdc_high,</group>
   </rule>
 
-  
   <rule id="102007" level="12">
     <if_group>syscheck</if_group>
     <field name="syscheck.path" type="pcre2">^(/var/www/|/usr/share/(roundcube|nginx|httpd)/|/opt/.*/webapps/)</field>
-    <description>CCDC Linux FIM: Webroot file modified/added ($(syscheck.path))</description>
+    <description>FIM webroot: $(syscheck.path)</description>
     <mitre>
       <id>T1505.003</id>
     </mitre>
@@ -82,7 +75,7 @@
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <field name="audit.exe" type="pcre2" negate="yes">/usr/bin/mktemp$</field>
     <match type="pcre2">(exe="/(tmp|dev/shm|var/tmp)/|a[01]="/(tmp|dev/shm|var/tmp)/|memfd:|exe="[^"]*\(deleted\)")</match>
-    <description>CCDC Linux Audit: Execution from temp/shm or deleted/memfd binary ($(audit.exe))</description>
+    <description>Temp/memfd exec: $(audit.exe)</description>
     <mitre>
       <id>T1059</id>
       <id>T1620</id>
@@ -93,7 +86,7 @@
   <rule id="102009" level="11">
     <if_group>audit|syslog</if_group>
     <match type="pcre2">(?i)(/dev/tcp/|(\bsh|\bbash)\b.*(\s|")-i(\s|"|$)|\b(nc|ncat)\b.*(\s|")-e(\s|"|$)|\bsocat\b.*exec:|curl.*\|\s*(ba)?sh|wget.*\|\s*(ba)?sh)</match>
-    <description>CCDC Linux: Reverse shell or piped payload execution detected</description>
+    <description>Reverse shell / piped payload</description>
     <mitre>
       <id>T1059.004</id>
       <id>T1105</id>
@@ -104,7 +97,7 @@
   <rule id="102010" level="12">
     <if_group>syscheck</if_group>
     <field name="syscheck.path" type="pcre2">^(/etc/ld\.so\.preload|/etc/pam\.d/|/etc/profile\.d/|/home/.*/\.ssh/authorized_keys|/root/\.ssh/authorized_keys)</field>
-    <description>CCDC Linux FIM: Persistence file modified ($(syscheck.path))</description>
+    <description>FIM persistence: $(syscheck.path)</description>
     <mitre>
       <id>T1574.006</id>
       <id>T1556.003</id>
@@ -116,7 +109,7 @@
   <rule id="102011" level="11">
     <if_group>syscheck</if_group>
     <field name="syscheck.path" type="pcre2">^/etc/(postfix|dovecot|exim4|mysql|postgresql)/</field>
-    <description>CCDC Linux FIM: Mail or database configuration modified ($(syscheck.path))</description>
+    <description>FIM mail/DB cfg: $(syscheck.path)</description>
     <mitre>
       <id>T1505</id>
     </mitre>
@@ -128,7 +121,7 @@
     <field name="audit.key" type="pcre2">^(shadow_read|suid_priv|ccdc_exec)$</field>
     <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|chage|passwd|wazuh-modulesd|wazuh-syscheckd|sshd-session|stat|useradd|userdel)$</field>
     <match type="pcre2">(chmod\b.*(\s|")(\+s|u\+s|[2467][0-7]{3})(\s|")|setcap\b|find\b.*-perm.*-4000|/etc/shadow)</match>
-    <description>CCDC Linux Audit: SUID/capability abuse or /etc/shadow access</description>
+    <description>SUID/shadow access</description>
     <mitre>
       <id>T1548.001</id>
       <id>T1003.008</id>
@@ -141,7 +134,7 @@
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <field name="audit.cwd" type="pcre2" negate="yes">^/var/ossec$</field>
     <match type="pcre2">\b(whoami|uname\b.*-a|cat\b.*/etc/passwd|ss\b.*-|netstat\b.*-)</match>
-    <description>CCDC Linux Audit: Host discovery command executed</description>
+    <description>Host discovery cmd</description>
     <mitre>
       <id>T1082</id>
       <id>T1033</id>
@@ -153,7 +146,7 @@
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <match type="pcre2">\b(mysqldump|pg_dump|7z\b.*a|tar\b.*-c)</match>
-    <description>CCDC Linux Audit: Database dump or archive staging executed</description>
+    <description>DB dump / archive staging</description>
     <mitre>
       <id>T1560</id>
       <id>T1005</id>
@@ -165,7 +158,7 @@
     <if_group>audit</if_group>
     <field name="audit.comm" type="pcre2">^(sh|bash|dash|python[0-9.]*|perl|nc)$</field>
     <match type="pcre2">UID="(www-data|apache|nginx|http)"</match>
-    <description>CCDC Linux Audit: Web server user spawned shell ($(audit.comm))</description>
+    <description>Web user shell: $(audit.comm)</description>
     <mitre>
       <id>T1505.003</id>
     </mitre>
@@ -175,7 +168,7 @@
   <rule id="102016" level="10">
     <if_group>web|accesslog</if_group>
     <match type="pcre2">(?i)(union\s+select|\.\./\.\./|cmd=|eval\(|base64_decode)</match>
-    <description>CCDC Linux Web: Possible SQLi, path traversal, or webshell request</description>
+    <description>Web SQLi/LFI/webshell</description>
     <mitre>
       <id>T1190</id>
     </mitre>
@@ -184,15 +177,15 @@
 
   <rule id="102017" level="4">
     <if_group>firewall|syslog</if_group>
-    <match type="pcre2">(\[UFW BLOCK\]|FINAL_REJECT:|_DROP|_REJECT)</match>
-    <description>CCDC Linux: Firewall blocked packet from $(srcip) to port $(dstport)</description>
+    <match type="pcre2">(\[UFW BLOCK\]|FINAL_REJECT:|_DROP|_REJECT).*SRC=</match>
+    <description>FW block $(srcip) -> :$(dstport)</description>
     <group>firewall,recon,</group>
   </rule>
 
   <rule id="102019" level="10" frequency="5" timeframe="30">
     <if_matched_sid>102017</if_matched_sid>
     <same_source_ip />
-    <description>CCDC Linux: Port scan or blocked probe burst from $(srcip)</description>
+    <description>Port scan burst: $(srcip)</description>
     <mitre>
       <id>T1046</id>
     </mitre>
@@ -203,7 +196,7 @@
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <match type="pcre2">(?i)(python[0-9.]*\b.*(subprocess|pty\.spawn|socket|os\.system)|perl\b.*(socket|IO::Socket)|php\b.*(fsockopen|shell_exec|system\()|ruby\b.*TCPSocket|mkfifo\b.*/tmp/)</match>
-    <description>CCDC Linux Audit: Script-based reverse shell or subprocess execution ($(audit.exe))</description>
+    <description>Script revshell: $(audit.exe)</description>
     <mitre>
       <id>T1059</id>
     </mitre>
@@ -213,7 +206,7 @@
   <rule id="102020" level="13">
     <if_group>syscheck</if_group>
     <field name="syscheck.path" type="pcre2">^(/bin/|/sbin/|/usr/bin/|/usr/sbin/)</field>
-    <description>CCDC Linux FIM: System binary modified or replaced ($(syscheck.path))</description>
+    <description>FIM sys binary: $(syscheck.path)</description>
     <mitre>
       <id>T1036</id>
     </mitre>
@@ -224,7 +217,7 @@
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <match type="pcre2">(systemctl\b.*(\s|")(stop|disable|mask)(\s|")|iptables\b.*(\s|")(-F|-P.*DROP|-A.*(DROP|REJECT))(\s|")|ufw\b.*(\s|")disable(\s|"))</match>
-    <description>CCDC Linux Audit: Service or firewall tampering ($(audit.exe))</description>
+    <description>Service/FW tamper: $(audit.exe)</description>
     <mitre>
       <id>T1489</id>
       <id>T1562.004</id>
@@ -236,7 +229,7 @@
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <match type="pcre2">(exe="/usr/bin/pkexec"|/(tmp|var|home|opt|etc)/\.[a-zA-Z0-9_-]+/)</match>
-    <description>CCDC Linux Audit: pkexec privesc or hidden dot-directory execution ($(audit.exe))</description>
+    <description>pkexec/hidden exec: $(audit.exe)</description>
     <mitre>
       <id>T1068</id>
       <id>T1564.001</id>
@@ -248,7 +241,7 @@
     <if_group>syslog|authentication_failed</if_group>
     <program_name type="pcre2">^(vsftpd|proftpd)$</program_name>
     <match type="pcre2">(FAIL LOGIN|Login failed|authentication failure|530 Login incorrect)</match>
-    <description>CCDC Linux: FTP authentication failure from $(srcip)</description>
+    <description>FTP auth fail: $(srcip)</description>
     <mitre>
       <id>T1110</id>
     </mitre>
@@ -258,7 +251,7 @@
   <rule id="102024" level="10" frequency="5" timeframe="30">
     <if_matched_sid>102023</if_matched_sid>
     <same_source_ip />
-    <description>CCDC Linux: FTP brute force detected from $(srcip)</description>
+    <description>FTP brute force: $(srcip)</description>
     <mitre>
       <id>T1110</id>
     </mitre>
@@ -269,7 +262,7 @@
     <if_group>syslog|authentication_failed</if_group>
     <program_name type="pcre2">^(dovecot|postfix|saslauthd)</program_name>
     <match type="pcre2">(auth failed|authentication failed|SASL .* authentication failed|Password mismatch)</match>
-    <description>CCDC Linux: Mail service authentication failure from $(srcip)</description>
+    <description>Mail auth fail: $(srcip)</description>
     <mitre>
       <id>T1110</id>
     </mitre>
@@ -279,7 +272,7 @@
   <rule id="102026" level="10" frequency="5" timeframe="30">
     <if_matched_sid>102025</if_matched_sid>
     <same_source_ip />
-    <description>CCDC Linux: Mail service brute force detected from $(srcip)</description>
+    <description>Mail brute force: $(srcip)</description>
     <mitre>
       <id>T1110</id>
     </mitre>
@@ -290,7 +283,7 @@
     <if_group>syslog|pam|authentication_failed</if_group>
     <program_name type="pcre2">^cockpit</program_name>
     <match type="pcre2">(authentication failure|Failed password|invalid user|Authentication failed)</match>
-    <description>CCDC Linux: Cockpit authentication failure from $(srcip)</description>
+    <description>Cockpit auth fail: $(srcip)</description>
     <mitre>
       <id>T1110</id>
     </mitre>
@@ -300,7 +293,7 @@
   <rule id="102028" level="10" frequency="5" timeframe="30">
     <if_matched_sid>102027</if_matched_sid>
     <same_source_ip />
-    <description>CCDC Linux: Cockpit brute force detected from $(srcip)</description>
+    <description>Cockpit brute force: $(srcip)</description>
     <mitre>
       <id>T1110</id>
     </mitre>
@@ -310,7 +303,7 @@
   <rule id="102029" level="10">
     <if_group>syscheck</if_group>
     <field name="file" type="pcre2">^(/etc/aliases|/etc/postfix/virtual|/var/vmail/.*\.sieve|/home/[^/]+/\.forward)$</field>
-    <description>CCDC Linux FIM: Mail forwarding, Sieve, or aliases modified ($(file))</description>
+    <description>FIM mail fwd/alias: $(file)</description>
     <mitre>
       <id>T1114.003</id>
     </mitre>

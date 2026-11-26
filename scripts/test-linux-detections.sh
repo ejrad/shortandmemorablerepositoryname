@@ -43,7 +43,8 @@ log_step "3. Parent -> Shell Reverse Shell Pattern (102018)"
 python3 -c 'import subprocess; subprocess.run(["/bin/sh", "-c", "id >/dev/null"])'
 log_ok "Parent->shell test completed."
 
-log_step "4. Persistence & Account Manipulation (102001, 102006, 102010)"
+log_step "4. Persistence, su to root & Account Manipulation (102001, 102004, 102006, 102010)"
+su - root -c "id >/dev/null" 2>/dev/null || true
 touch /etc/cron.d/redteam_test
 useradd testred 2>/dev/null || true
 mkdir -p /root/.ssh
