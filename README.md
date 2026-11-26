@@ -1,4 +1,8 @@
-# CCDC Wazuh IDS
+# LARPMAXXING SUPREME
+
+![SOC Wizard](docs/soc-wizard.png)
+
+<img src="docs/larp.jpg" alt="the more you larp, the less you larp" width="100%" />
 
 ## Ports
 - `51514/tcp` — Agent events (custom, replaces `1514`)

@@ -15,15 +15,15 @@ For general Wazuh UI navigation, column setup, and DQL search filters, see [WAZU
 
 | Panel | What It Shows | Action to Take |
 | :--- | :--- | :--- |
-| **CCDC Alerts by Host Over Time** | `rule.level >= 7` per `agent.name` (1m buckets) | Spot which scored box is actively getting hit; click a host bar to filter the entire dashboard to that box. |
-| **CCDC Top Attacking Source IPs** | Top 10 `data.srcip` on `rule.level >= 7` (excludes `?`) | Grab the attacker IP (`+` filter to inspect, or block at Palo Alto / host firewall). |
-| **CCDC Persistence, Webshells & Rootkits** | `persistence`, `webshell`, `rootkit`, `credential_access` | **Highest priority:** check `syscheck.path` / `rule.description` and remove planted cron/SSH keys/webshells/SUIDs immediately. |
-| **CCDC Active Brute Force & Recon** | SSH (`102002`), portscan (`102019`), FTP (`102024`), Mail (`102026`), Cockpit (`102028`), Windows RDP/SMB (`101009`) | Identify credential-stuffing or scanning IPs before they succeed. |
-| **CCDC MITRE ATT&CK Techniques (IR)** | `rule.mitre.id` + `rule.description` (`rule.level >= 7`) | Copy-paste exact `Txxxx` technique IDs into Incident Reports. |
-| **CCDC Targeted / Used Accounts (IR)** | `data.dstuser` + `agent.name` (`rule.level >= 7`) | Identify compromised/targeted accounts for password resets & IRs. |
-| **CCDC Targeted / Outbound Ports** | `data.dstport` + `agent.name` + `data.srcip` (`data.dstport:*`) | Spot scanned ports and outbound C2 ports for firewall rules & IRs. |
-| **CCDC Suspicious Binaries & Processes (IR)** | `data.audit.exe` / `data.win.eventdata.image` (`rule.groups:ccdc_high`) | Grab exact binary/payload paths for containment & IR evidence. |
-| **CCDC Live High-Severity Feed** | Full-width live stream (`rule.groups:ccdc_high OR rule.level>=10`) | Triage alert-by-alert; click **`>`** on any row to inspect `full_log`, `data.audit.exe`, `syscheck.path`, or `data.win.eventdata.commandLine`. |
+| **Alerts by Host Over Time** | `rule.level >= 7` per `agent.name` (1m buckets) | Spot which scored box is actively getting hit; click a host bar to filter the entire dashboard to that box. |
+| **Top Attacking Source IPs** | Top 10 `data.srcip` on `rule.level >= 7` (excludes `?`) | Grab the attacker IP (`+` filter to inspect, or block at Palo Alto / host firewall). |
+| **Persistence, Webshells & Rootkits** | `persistence`, `webshell`, `rootkit`, `credential_access` | **Highest priority:** check `syscheck.path` / `rule.description` and remove planted cron/SSH keys/webshells/SUIDs immediately. |
+| **Active Brute Force & Recon** | SSH (`102002`), portscan (`102019`), FTP (`102024`), Mail (`102026`), Cockpit (`102028`), Windows RDP/SMB (`101009`) | Identify credential-stuffing or scanning IPs before they succeed. |
+| **MITRE ATT&CK Techniques (IR)** | `rule.mitre.id` + `rule.description` (`rule.level >= 7`) | Copy-paste exact `Txxxx` technique IDs into Incident Reports. |
+| **Targeted / Used Accounts (IR)** | `data.dstuser` + `agent.name` (`rule.level >= 7`) | Identify compromised/targeted accounts for password resets & IRs. |
+| **Targeted / Outbound Ports** | `data.dstport` + `agent.name` + `data.srcip` (`data.dstport:*`) | Spot scanned ports and outbound C2 ports for firewall rules & IRs. |
+| **Suspicious Binaries & Processes (IR)** | `data.audit.exe` / `data.win.eventdata.image` (`rule.groups:ccdc_high`) | Grab exact binary/payload paths for containment & IR evidence. |
+| **Live High-Severity Feed** | Full-width live stream (`rule.groups:ccdc_high OR rule.level>=10`) | Triage alert-by-alert; click **`>`** on any row to inspect `full_log`, `data.audit.exe`, `syscheck.path`, or `data.win.eventdata.commandLine`. |
 
 ## 3. Fast Triage Workflow (5-Second Loop)
 1. **Filter by host:** Click any `agent.name` in **Alerts by Host** (or add `agent.name:"<HOST>"` in the top bar) when an inject/outage hits that box.
