@@ -183,7 +183,7 @@
   <rule id="102017" level="4">
     <if_group>firewall|syslog</if_group>
     <match type="pcre2">(\[UFW BLOCK\]|FINAL_REJECT:|_DROP|_REJECT)</match>
-    <description>CCDC Linux: Firewall blocked packet from $(srcip)</description>
+    <description>CCDC Linux: Firewall blocked packet from $(srcip) to port $(dstport)</description>
     <group>firewall,recon,</group>
   </rule>
 

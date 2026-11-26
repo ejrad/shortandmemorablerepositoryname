@@ -14,6 +14,7 @@ BUNDLES = {
         "wazuh/rules/local_rules.xml",
         "wazuh/rules/ccdc_windows_rules.xml",
         "wazuh/rules/ccdc_linux_rules.xml",
+        "wazuh/decoders/ccdc_ufw_decoder.xml",
         "wazuh/agent-configs/windows-agent.conf",
         "wazuh/agent-configs/linux-agent.conf",
         "wazuh/agent-configs/ccdc-audit.rules",

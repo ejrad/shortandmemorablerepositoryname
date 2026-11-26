@@ -32,7 +32,12 @@ sed -i -E "s/\b1514\b/${WAZUH_EVENTS_PORT}/g; s/\b1515\b/${WAZUH_ENROLL_PORT}/g"
 sed -i -E "s|(systemctl start )|[[ -f /var/ossec/etc/ossec.conf ]] \&\& sed -i -E 's\|<port>1514</port>\|<port>${WAZUH_EVENTS_PORT}</port>\|g; s\|<port>1515</port>\|<port>${WAZUH_ENROLL_PORT}</port>\|g' /var/ossec/etc/ossec.conf; \1|g" "${TMP_DIR}/wazuh-install.sh"
 bash "${TMP_DIR}/wazuh-install.sh" -a -o -i
 
-log_step "Deploying CCDC custom rules"
+log_step "Deploying CCDC custom decoders and rules"
+install -d -m 0750 -o root -g wazuh /var/ossec/etc/decoders
+for dec in "${REPO_ROOT}/wazuh/decoders/"*.xml; do
+    install -m 0640 -o root -g wazuh "$dec" "/var/ossec/etc/decoders/$(basename "$dec")"
+    log_ok "Installed decoder: $(basename "$dec")"
+done
 install -d -m 0750 -o root -g wazuh /var/ossec/etc/rules
 for rule in "${REPO_ROOT}/wazuh/rules/"*.xml; do
     install -m 0640 -o root -g wazuh "$rule" "/var/ossec/etc/rules/$(basename "$rule")"
