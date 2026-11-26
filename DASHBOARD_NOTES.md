@@ -3,7 +3,7 @@
 ## 1. Live Alert Triage (Main Screen)
 1. Click **`☰` (top-left) -> Threat intelligence -> Threat Hunting -> Events**.
 2. Click the **time picker (top-right)** -> set **Last 15 minutes** (or **Last 1 hour**) -> click **Refresh every `5` or `10` seconds -> Start**.
-3. **Recommended Columns** (click **Columns**): `data.srcip`, `syscheck.path`, `data.audit.exe`, `data.win.eventdata.image`, `data.win.eventdata.commandLine`.
+3. **Recommended Columns** (click **Columns**): `data.srcip`, `syscheck.path`, `data.audit.exe`, `data.audit.execve.a1`, `data.dstuser`, `data.dstport`, `data.win.eventdata.image`, `data.win.eventdata.commandLine`.
 4. **12-hr time-only format**: `☰ -> Dashboard management -> Advanced settings -> dateFormat` -> `hh:mm:ss A` -> **Save** & refresh.
 5. Expand any row (`>` / magnifying glass) and switch to the **JSON** or **Table** tab to see full process paths, parent processes, command lines, and IPs.
 

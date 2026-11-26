@@ -65,4 +65,4 @@ sudo /var/ossec/bin/wazuh-analysisd -t && sudo systemctl restart wazuh-manager
 
 ## 5. Dashboard UI Setup
 - **12-hour time-only format**: `☰ -> Dashboard management -> Advanced settings -> dateFormat` -> `hh:mm:ss A` -> Save & refresh.
-- **Columns to enable** (in `Threat Hunting -> Events` -> **Columns**): `data.srcip`, `syscheck.path`, `data.audit.exe`, `data.win.eventdata.image`, `data.win.eventdata.commandLine`.
+- **Columns to enable** (in `Threat Hunting -> Events` -> **Columns**): `data.srcip`, `syscheck.path`, `data.audit.exe`, `data.audit.execve.a1`, `data.dstuser`, `data.dstport`, `data.win.eventdata.image`, `data.win.eventdata.commandLine`.
