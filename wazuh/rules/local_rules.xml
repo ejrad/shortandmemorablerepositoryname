@@ -21,4 +21,14 @@
     <description>FIM: Suppressed - temporary/cache file change</description>
   </rule>
 
+  <rule id="100203" level="0">
+    <if_sid>19004,19007,19008,19009</if_sid>
+    <description>SCA: Suppressed - startup CIS benchmark flood</description>
+  </rule>
+
+  <rule id="100204" level="0">
+    <if_sid>80705</if_sid>
+    <description>Auditd: Suppressed - startup rule reload</description>
+  </rule>
+
 </group>

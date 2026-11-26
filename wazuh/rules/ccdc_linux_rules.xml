@@ -119,7 +119,7 @@
   <rule id="102012" level="12">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^(shadow_read|suid_priv|ccdc_exec)$</field>
-    <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|chage|passwd|wazuh-modulesd|wazuh-syscheckd|sshd-session|stat|useradd|userdel)$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|accounts-daemon|chage|passwd|wazuh-modulesd|wazuh-syscheckd|sshd-session|stat|useradd|userdel)$</field>
     <match type="pcre2">(chmod\b.*(\s|")(\+s|u\+s|[2467][0-7]{3})(\s|")|setcap\b|find\b.*-perm.*-4000|/etc/shadow)</match>
     <description>SUID/shadow access</description>
     <mitre>
