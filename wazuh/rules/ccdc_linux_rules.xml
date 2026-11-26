@@ -163,9 +163,9 @@
 
   <rule id="102015" level="13">
     <if_group>audit</if_group>
-    <field name="audit.ppid_comm" type="pcre2">^(apache2|httpd|nginx|php-fpm)$</field>
-    <field name="audit.comm" type="pcre2">^(sh|bash|dash|python|python3|perl|nc)$</field>
-    <description>CCDC Linux Audit: Web server spawned shell ($(audit.ppid_comm) -> $(audit.comm))</description>
+    <field name="audit.comm" type="pcre2">^(sh|bash|dash|python[0-9.]*|perl|nc)$</field>
+    <match type="pcre2">UID="(www-data|apache|nginx|http)"</match>
+    <description>CCDC Linux Audit: Web server user spawned shell ($(audit.comm))</description>
     <mitre>
       <id>T1505.003</id>
     </mitre>
@@ -189,7 +189,7 @@
     <group>firewall,recon,</group>
   </rule>
 
-  <rule id="102019" level="10" frequency="10" timeframe="30">
+  <rule id="102019" level="10" frequency="5" timeframe="30">
     <if_matched_sid>102017</if_matched_sid>
     <same_source_ip />
     <description>CCDC Linux: Port scan or blocked probe burst from $(srcip)</description>
@@ -201,9 +201,9 @@
 
   <rule id="102018" level="12">
     <if_group>audit</if_group>
-    <field name="audit.ppid_comm" type="pcre2">^(nc|ncat|netcat|socat|python[0-9.]*|perl|php|ruby)$</field>
-    <field name="audit.comm" type="pcre2">^(sh|bash|dash|zsh)$</field>
-    <description>CCDC Linux Audit: Possible reverse shell ($(audit.ppid_comm) -> $(audit.comm))</description>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <match type="pcre2">(?i)(python[0-9.]*\b.*(subprocess|pty\.spawn|socket|os\.system)|perl\b.*(socket|IO::Socket)|php\b.*(fsockopen|shell_exec|system\()|ruby\b.*TCPSocket|mkfifo\b.*/tmp/)</match>
+    <description>CCDC Linux Audit: Script-based reverse shell or subprocess execution ($(audit.exe))</description>
     <mitre>
       <id>T1059</id>
     </mitre>

@@ -29,7 +29,7 @@ def find_browser() -> str:
     raise FileNotFoundError("Chrome or Edge executable not found for PDF export.")
 
 
-def parse_rules(xml_path: Path, tested: set[int], failed: set[int], new_ids: set[int]) -> list[dict]:
+def parse_rules(xml_path: Path, tested: set[int], failed: set[int], plaus: dict[int, str], new_ids: set[int], notes: list[tuple[int, str]]) -> list[dict]:
     root = ET.fromstring(f"<wrap>{xml_path.read_text(encoding='utf-8')}</wrap>")
     rows = []
     for r in root.iter("rule"):
@@ -38,16 +38,24 @@ def parse_rules(xml_path: Path, tested: set[int], failed: set[int], new_ids: set
         desc = (r.findtext("description") or "").strip()
         mitre = [m.text.strip() for m in r.findall("mitre/id") if m.text]
         groups = [g.strip() for g in (r.findtext("group") or "").split(",") if g.strip()]
+        note_idx = None
         if rid in tested:
             status = "TESTED"
-            result = "FAIL" if rid in failed else "PASS"
+            if rid in failed:
+                result = "FAIL"
+            elif rid in plaus:
+                result = "PLAUS"
+                notes.append((rid, plaus[rid]))
+                note_idx = len(notes)
+            else:
+                result = "PASS"
         elif rid in new_ids:
             status = "NEW"
             result = ""
         else:
             status = "UNTESTED"
             result = ""
-        rows.append({"id": rid, "level": lvl, "desc": desc, "mitre": mitre, "groups": groups, "status": status, "result": result})
+        rows.append({"id": rid, "level": lvl, "desc": desc, "mitre": mitre, "groups": groups, "status": status, "result": result, "note_idx": note_idx})
     return rows
 
 
@@ -61,11 +69,14 @@ def status_badge(st: str) -> str:
     return f'<span class="badge {cls}">{st}</span>'
 
 
-def result_badge(res: str) -> str:
+def result_badge(res: str, note_idx: int | None) -> str:
     if res == "PASS":
         return '<span class="badge res-pass">PASS</span>'
     if res == "FAIL":
         return '<span class="badge res-fail">FAIL</span>'
+    if res == "PLAUS":
+        sup = f"<sup>{note_idx}</sup>" if note_idx else ""
+        return f'<span class="badge res-plaus">PLAUS{sup}</span>'
     return '<span class="muted">—</span>'
 
 
@@ -78,7 +89,7 @@ def render_section(title: str, rows: list[dict]) -> str:
             f'<tr><td class="mono">{r["id"]}</td>'
             f'<td>{lvl_badge(r["level"])}</td>'
             f'<td>{status_badge(r["status"])}</td>'
-            f'<td>{result_badge(r["result"])}</td>'
+            f'<td>{result_badge(r["result"], r["note_idx"])}</td>'
             f'<td><strong>{html.escape(r["desc"])}</strong><div class="groups">{grp_html}</div></td>'
             f'<td>{mitre_html}</td></tr>'
         )
@@ -86,7 +97,7 @@ def render_section(title: str, rows: list[dict]) -> str:
         f'<section><h2>{html.escape(title)} <span class="count">({len(rows)} rules)</span></h2>'
         f'<table><thead><tr>'
         f'<th style="width:66px">Rule ID</th><th style="width:70px">Severity</th>'
-        f'<th style="width:84px">Status</th><th style="width:64px">Passed</th>'
+        f'<th style="width:84px">Status</th><th style="width:72px">Passed</th>'
         f'<th>Description &amp; Groups</th>'
         f'<th style="width:115px">MITRE ATT&amp;CK</th></tr></thead>'
         f'<tbody>{"".join(trs)}</tbody></table></section>'
@@ -97,12 +108,13 @@ def main() -> None:
     status_data = json.loads(STATUS_PATH.read_text(encoding="utf-8"))
     tested = set(status_data.get("tested", []))
     failed = set(status_data.get("failed", []))
+    plaus = {int(k): v for k, v in status_data.get("plaus", {}).items()}
     new_ids = set(status_data.get("new", []))
 
     rule_files = sorted(RULES_DIR.glob("*.xml"))
-    all_rows, sections = [], []
+    all_rows, sections, notes = [], [], []
     for path in rule_files:
-        rows = parse_rules(path, tested, failed, new_ids)
+        rows = parse_rules(path, tested, failed, plaus, new_ids, notes)
         all_rows.extend(rows)
         sections.append(render_section(path.name, rows))
 
@@ -120,6 +132,12 @@ def main() -> None:
         f'<div class="kpi untested"><div class="num">{untested_cnt}</div><div class="lbl">Untested</div></div>'
         f'</div>'
     )
+
+    footnotes = ""
+    if notes:
+        items = "".join(f'<li><strong>Rule {rid}:</strong> {html.escape(msg)}</li>' for rid, msg in notes)
+        footnotes = f'<div class="footnotes"><h3>Circumstantial Notes (PLAUS)</h3><ol>{items}</ol></div>'
+
     now = datetime.now()
     html_out = (
         TMPL_PATH.read_text(encoding="utf-8")
@@ -127,6 +145,7 @@ def main() -> None:
         .replace("{{SUBTITLE}}", f"Generated {now.strftime('%Y-%m-%d %I:%M %p')} &bull; {total} Custom Rules")
         .replace("{{KPI_CARDS}}", kpis)
         .replace("{{SECTIONS}}", "".join(sections))
+        .replace("{{FOOTNOTES}}", footnotes)
     )
 
     out_pdf = REPORTS_DIR / f"wazuh-rules-report-{now.strftime('%Y-%m-%d_%H-%M')}.pdf"

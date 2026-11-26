@@ -1,5 +1,9 @@
 {
   "tested": [102001, 102002, 102005, 102006, 102008, 102009, 102010, 102012, 102013, 102014, 102017, 102018, 102019, 102021, 102022],
-  "failed": [102006, 102010, 102018, 102019],
+  "failed": [102018, 102019],
+  "plaus": {
+    "102006": "FIM alert requires waiting for syscheckd baseline scan (>2s); test script ran touch + rm in 2s.",
+    "102010": "FIM alert requires /root/.ssh to exist before syscheckd baseline scan or waiting for next 300s sweep."
+  },
   "new": []
 }
