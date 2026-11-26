@@ -151,3 +151,76 @@ rm -f /tmp/loot_test.tar.gz
 - **Where to check**: **Threat Hunting -> Events** -> filter `rule.id:102014`
 - **What you should see**:
   - **`102014`** (Level 10): `CCDC Linux Audit: Database dump or archive staging executed` (`T1560`)
+
+---
+
+## Part 3: Remaining Untested Linux Rules
+
+### 11. Root SSH Login (`102003`) & Interactive `su` (`102004`)
+- **`102003`**: Temporarily set `PermitRootLogin yes` in `/etc/ssh/sshd_config`, `sudo systemctl restart ssh`, run `ssh root@<DEBIAN_IP>` from Kali, then revert.
+- **`102004`**: From a non-root user on Debian, run `su -`.
+
+### 12. Package Management (`102005`) & Parent -> Shell (`102018`)
+```bash
+sudo apt-get install -y sl && sudo apt-get remove -y sl
+python3 -c 'import subprocess; subprocess.run(["/bin/sh", "-c", "id"])'
+```
+
+### 13. FIM Persistence & Service Configs (`102006`, `102007`, `102010`, `102011`)
+*(Requires `<alert_new_files>yes</alert_new_files>` in `<syscheck>`.)*
+```bash
+sudo touch /etc/cron.d/fim_test && sudo mkdir -p /root/.ssh && sudo touch /root/.ssh/authorized_keys
+sudo rm -f /etc/cron.d/fim_test
+```
+*(If Apache/Nginx/Postfix are installed: `sudo touch /var/www/html/test.php` -> `102007`; `sudo touch /etc/postfix/test_conf` -> `102011`.)*
+
+---
+
+## Part 4: Untested Windows Rules (`101001`–`101032`)
+
+Enroll a Windows VM (`.\scripts\agents\install-wazuh-agent-windows.ps1 -ManagerIp <DEBIAN_IP> -InstallSysmon`), then run in **elevated PowerShell**:
+
+### 14. Discovery, PowerShell 4104, Download Cradle, Outbound (`101028`, `101003`, `101016`, `101015`, `101032`)
+```powershell
+whoami; net user
+powershell -Command "Write-Output 'DownloadString IEX'; Invoke-WebRequest http://1.1.1.1 -UseBasicParsing"
+powershell -Command "Write-Output 'AmsiUtils'"
+```
+
+### 15. Temp Staging & Sacrificial Process (`101017`, `101024`)
+```powershell
+Copy-Item C:\Windows\System32\whoami.exe $env:TEMP\whoami_test.exe; & $env:TEMP\whoami_test.exe
+powershell -Command "Start-Process rundll32.exe"
+Remove-Item $env:TEMP\whoami_test.exe -Force
+```
+
+### 16. Persistence: Account, Scheduled Task, Registry Run (`101001`, `101002`, `101019`)
+```powershell
+net user wazuh_test Password123! /add; net user wazuh_test /delete
+schtasks /create /tn "WazuhTest" /tr "cmd /c exit" /sc once /st 23:59 /f; schtasks /delete /tn "WazuhTest" /f
+New-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name WazuhTest -Value "cmd.exe" -Force
+Remove-ItemProperty -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name WazuhTest
+```
+
+### 17. Credential CLI, Archive Staging, Webroot FIM (`101008`, `101030`, `101012`)
+```powershell
+cmd /c "echo certutil -urlcache"
+Compress-Archive -Path C:\Windows\System32\whoami.exe -DestinationPath $env:TEMP\test.zip -Force
+Remove-Item $env:TEMP\test.zip -Force
+```
+*(If IIS is installed: `New-Item C:\inetpub\wwwroot\test.txt -Force; Remove-Item C:\inetpub\wwwroot\test.txt` -> `101012`.)*
+
+### 18. RDP Brute Force & Login (`101004`, `101005`, `101010`)
+From Kali:
+```bash
+hydra -l Administrator -P /usr/share/wordlists/fasttrack.txt rdp://<WIN_IP> -t 4 -f
+```
+*(Cancel after ~10 attempts, then RDP in once successfully for `101010`.)*
+
+### 19. Defender, LSASS, Injection, WMI, AD (`101006`, `101007`, `101013`, `101014`, `101018`, `101020`–`101023`, `101025`–`101027`, `101029`, `101031`)
+Test via Atomic Red Team (`Invoke-AtomicTest T1003.001`, `T1055`, `T1546.003`, `T1558.003`) or against a lab AD Domain Controller.
+
+---
+
+## Part 5: Local Noise Suppression (`100200`–`100202`)
+Run `sudo apt-get update` and `touch /tmp/noise_test && rm -f /tmp/noise_test`, then confirm **no** FIM alerts appear for `/var/lib/apt/` or `/tmp/` under `rule.groups:syscheck`.

@@ -10,6 +10,7 @@ BUNDLES = {
     "wazuh-server-debian.tar.gz": [
         "scripts/server/install-wazuh-server-debian.sh",
         "scripts/server/check-wazuh-rule-ids.py",
+        "scripts/test-linux-detections.sh",
         "scripts/lib/common.sh",
         "wazuh/rules/local_rules.xml",
         "wazuh/rules/ccdc_windows_rules.xml",
@@ -21,6 +22,7 @@ BUNDLES = {
     ],
     "wazuh-agent-linux.tar.gz": [
         "scripts/agents/install-wazuh-agent-linux.sh",
+        "scripts/test-linux-detections.sh",
         "scripts/lib/common.sh",
         "wazuh/agent-configs/ccdc-audit.rules",
     ],
