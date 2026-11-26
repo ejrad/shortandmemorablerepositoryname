@@ -120,21 +120,12 @@ def main() -> None:
         f'<div class="kpi untested"><div class="num">{untested_cnt}</div><div class="lbl">Untested</div></div>'
         f'</div>'
     )
-    new_leg = '<span class="badge st-new">NEW</span> Added since last test. &nbsp; ' if new_cnt else ""
-    legend = (
-        '<div class="legend"><strong>Status Legend:</strong> '
-        '<span class="badge st-tested">TESTED</span> Verified live. &nbsp; '
-        f'{new_leg}'
-        '<span class="badge st-untested">UNTESTED</span> Pending live test.</div>'
-    )
-
     now = datetime.now()
     html_out = (
         TMPL_PATH.read_text(encoding="utf-8")
         .replace("{{TITLE}}", "CCDC Wazuh 4.14 Detection Rules Report")
         .replace("{{SUBTITLE}}", f"Generated {now.strftime('%Y-%m-%d %I:%M %p')} &bull; {total} Custom Rules")
         .replace("{{KPI_CARDS}}", kpis)
-        .replace("{{LEGEND}}", legend)
         .replace("{{SECTIONS}}", "".join(sections))
     )
 
