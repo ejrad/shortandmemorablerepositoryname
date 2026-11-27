@@ -36,7 +36,7 @@ cmd.exe /c 'rundll32.exe'
 Write-Ok 'Sacrificial process test completed.'
 
 Write-Step '5. Suspicious PowerShell ScriptBlock & AMSI Pattern (101003, 101032)'
-powershell.exe -NoProfile -Command '$null = "DownloadString"; $null = "IEX"; $null = "AmsiUtils"'
+powershell.exe -NoProfile -Command { $null = 'DownloadString'; $null = 'IEX'; $null = 'AmsiUtils' }
 Write-Ok 'PowerShell ScriptBlock tests completed.'
 
 Write-Step '6. Download Cradle & Outbound Connection (101016, 101015)'

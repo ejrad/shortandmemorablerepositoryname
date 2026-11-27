@@ -33,8 +33,8 @@
 
   <rule id="100205" level="0">
     <if_sid>92900</if_sid>
-    <field name="win.eventdata.sourceImage" type="pcre2">(?i)\\Windows Defender\\Platform\\.*\\MsMpEng\.exe$</field>
-    <description>Windows: Suppressed - Defender LSASS scan</description>
+    <field name="win.eventdata.sourceImage" type="pcre2">(?i)(\\Windows Defender\\Platform\\.*\\MsMpEng\.exe$|C:\\Windows\\System32\\svchost\.exe$)</field>
+    <description>Windows: Suppressed - Defender/svchost LSASS read</description>
   </rule>
 
   <rule id="100206" level="0">
