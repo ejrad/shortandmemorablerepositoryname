@@ -24,7 +24,7 @@
   </rule>
 
   <rule id="101003" level="13">
-    <if_sid>60000</if_sid>
+    <if_sid>60000,60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^4104$</field>
     <field name="win.eventdata.scriptBlockText" type="pcre2">(?i)(DownloadString|IEX|Invoke-Expression|-enc\b|-EncodedCommand|bypass|Invoke-ReflectivePEInjection)</field>
     <description>Suspicious PS ScriptBlock</description>
@@ -35,8 +35,7 @@
   </rule>
 
   <rule id="101004" level="6">
-    <if_sid>60000</if_sid>
-    <field name="win.system.eventID" type="pcre2">^4625$</field>
+    <if_sid>60122</if_sid>
     <description>Failed logon (4625)</description>
     <group>authentication_failed,</group>
   </rule>
@@ -308,7 +307,7 @@
   </rule>
 
   <rule id="101028" level="8">
-    <if_sid>60000</if_sid>
+    <if_sid>60000,61603,92031,92033,92036,92039</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1)$</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(\bwhoami\b|\bnltest\b|\bnet\s+(user|group|localgroup|view)\b|SharpHound|BloodHound)</field>
     <description>Win/AD discovery: $(win.eventdata.commandLine)</description>
@@ -356,7 +355,7 @@
   </rule>
 
   <rule id="101032" level="13">
-    <if_sid>60000</if_sid>
+    <if_sid>60000,60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^4104$</field>
     <field name="win.eventdata.scriptBlockText" type="pcre2">(?i)(AmsiUtils|amsiInitFailed|EtwEventWrite|Add-MpPreference.*-Exclusion)</field>
     <description>AMSI/ETW bypass or Defender exclusion</description>

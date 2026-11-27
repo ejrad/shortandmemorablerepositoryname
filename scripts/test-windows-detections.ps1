@@ -77,9 +77,18 @@ if (Test-Path 'C:\inetpub\wwwroot') {
 }
 
 if ($KaliIp) {
-    Write-Host "`n[KALI ACTION] Run SMB/RDP brute force from Kali against ${WinIp} (101004, 101005):" -ForegroundColor Yellow
-    Write-Host "  hydra -l fakeuser -P /usr/share/wordlists/fasttrack.txt -t 4 -f smb://${WinIp}"
-    Read-Host "Press Enter once done on Kali (or Enter to skip)" | Out-Null
+    $ans = Read-Host "Test SMB brute force (101004, 101005)? Temporarily enables File and Printer Sharing (Enter=yes / 'skip')"
+    if ($ans.ToLower() -ne 'skip') {
+        $wasEnabled = (Get-NetFirewallRule -DisplayGroup 'File and Printer Sharing' -ErrorAction SilentlyContinue | Where-Object { $_.Enabled -eq 'True' }).Count -gt 0
+        Enable-NetFirewallRule -DisplayGroup 'File and Printer Sharing' -ErrorAction SilentlyContinue
+        Write-Host "`n[KALI ACTION] Run 6 SMB login attempts from Kali against ${WinIp} (101004, 101005):" -ForegroundColor Yellow
+        Write-Host "  hydra -I -l fakeuser -P <(head -n 6 /usr/share/wordlists/fasttrack.txt) smb://${WinIp}"
+        Read-Host 'Press Enter once done on Kali' | Out-Null
+        if (-not $wasEnabled) {
+            Disable-NetFirewallRule -DisplayGroup 'File and Printer Sharing' -ErrorAction SilentlyContinue
+            Write-Ok 'Reverted File and Printer Sharing firewall rules.'
+        }
+    }
 }
 
 Write-Ok 'All Windows detection tests finished. Check CCDC Live Triage Dashboard in Wazuh.'
