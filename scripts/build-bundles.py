@@ -29,6 +29,7 @@ BUNDLES = {
     ],
     "wazuh-agent-windows.tar.gz": [
         "scripts/agents/install-wazuh-agent-windows.ps1",
+        "scripts/test-windows-detections.ps1",
         "scripts/lib/Common.psm1",
         "wazuh/agent-configs/sysmonconfig.xml",
     ],
