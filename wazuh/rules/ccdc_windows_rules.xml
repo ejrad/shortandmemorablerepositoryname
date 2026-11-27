@@ -196,7 +196,7 @@
     <field name="win.system.eventID" type="pcre2">^10$</field>
     <field name="win.eventdata.targetImage" type="pcre2">(?i)\\lsass\.exe$</field>
     <field name="win.eventdata.grantedAccess" type="pcre2">(?i)0x[0-9a-f]*[13579bdf][0-9a-f]\b</field>
-    <field name="win.eventdata.sourceImage" type="pcre2" negate="yes">(?i)^C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\[^\\]+\\MsMpEng\.exe$</field>
+    <field name="win.eventdata.sourceImage" type="pcre2" negate="yes">(?i)^C:\\+ProgramData\\+Microsoft\\+Windows Defender\\+Platform\\+[^\\]+\\+MsMpEng\.exe$</field>
     <description>LSASS access: $(win.eventdata.sourceImage)</description>
     <mitre>
       <id>T1003.001</id>
@@ -210,7 +210,7 @@
     <field name="win.system.eventID" type="pcre2">^3$</field>
     <field name="win.eventdata.initiated" type="pcre2">^true$</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(\\(powershell|pwsh|cmd|rundll32|regsvr32|mshta|wscript|cscript|certutil|bitsadmin)\.exe$|\\(Users|ProgramData|Windows\\Temp|Temp|PerfLogs)\\)</field>
-    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)\\AppData\\Local\\(Google\\Chrome\\Application\\chrome|Microsoft\\Edge\\Application\\msedge|Microsoft\\OneDrive\\OneDrive)\.exe$</field>
+    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)(^C:\\+ProgramData\\+Microsoft\\+Windows Defender\\+Platform\\+[^\\]+\\+(MsMpEng|MpDefenderCoreService)\.exe$|\\+AppData\\+Local\\+(Google\\+Chrome\\+Application\\+chrome|Microsoft\\+Edge\\+Application\\+msedge|Microsoft\\+OneDrive\\+([^\\]+\\+)?(OneDrive|OneDrive\.Sync\.Service))\.exe$)</field>
     <description>C2 outbound: $(win.eventdata.image) -> $(win.eventdata.destinationIp):$(win.eventdata.destinationPort)</description>
     <mitre>
       <id>T1071</id>
@@ -235,7 +235,7 @@
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^1$</field>
     <field name="win.eventdata.image" type="pcre2">(?i)\\(Users|ProgramData|Windows\\Temp|Temp|PerfLogs)\\</field>
-    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)\\AppData\\Local\\(Google\\Chrome\\Application\\chrome|Microsoft\\Edge\\Application\\msedge|Microsoft\\EdgeUpdate\\MicrosoftEdgeUpdate|Microsoft\\OneDrive\\OneDrive)\.exe$</field>
+    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)(^C:\\+ProgramData\\+Microsoft\\+Windows Defender\\+Platform\\+[^\\]+\\+(MsMpEng|MpDefenderCoreService)\.exe$|\\+AppData\\+Local\\+(Google\\+Chrome\\+Application\\+chrome|Microsoft\\+Edge\\+Application\\+msedge|Microsoft\\+EdgeUpdate\\+MicrosoftEdgeUpdate|Microsoft\\+OneDrive\\+([^\\]+\\+)?(OneDrive|OneDrive\.Sync\.Service|FileCoAuth))\.exe$)</field>
     <description>User/temp exec: $(win.eventdata.image)</description>
     <mitre>
       <id>T1204</id>
@@ -248,7 +248,7 @@
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^7$</field>
     <field name="win.eventdata.imageLoaded" type="pcre2">(?i)\\(clr|mscoree|System\.Management\.Automation(\.ni)?)\.dll$</field>
-    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)(^C:\\Windows\\(System32|SysWOW64)\\WindowsPowerShell\\v1\.0\\powershell\.exe$|^C:\\Program Files\\PowerShell\\[^\\]+\\pwsh\.exe$|^C:\\Windows\\Microsoft\.NET\\Framework(64)?\\[^\\]+\\(MSBuild|csc)\.exe$|^C:\\Program Files.*\\Microsoft Visual Studio\\.*\\(MSBuild|devenv)\.exe$)</field>
+    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)(^C:\\+Windows\\+(System32|SysWOW64)\\+WindowsPowerShell\\+v1\.0\\+powershell\.exe$|^C:\\+Program Files\\+PowerShell\\+[^\\]+\\+pwsh\.exe$|^C:\\+Windows\\+Microsoft\.NET\\+Framework(64)?\\+[^\\]+\\+(MSBuild|csc)\.exe$|^C:\\+Program Files.*\\+Microsoft Visual Studio\\+.*\\+(MSBuild|devenv)\.exe$)</field>
     <description>Unmanaged .NET CLR: $(win.eventdata.image)</description>
     <mitre>
       <id>T1620</id>
@@ -261,6 +261,7 @@
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^(12|13|14)$</field>
     <field name="win.eventdata.targetObject" type="pcre2">(?i)(\\CurrentVersion\\Run|\\Winlogon\\|\\Image File Execution Options\\|\\AppInit_DLLs|\\AppCertDlls|\\Control\\Lsa|\\CurrentControlSet\\Services\\|\\UserInitMprLogonScript|\\Windows Defender\\Exclusions|\\fDenyTSConnections)</field>
+    <field name="win.eventdata.targetObject" type="pcre2" negate="yes">(?i)\\+Winlogon\\+(PasswordExpiryNotification|AutoLogonChecked)(\\|$)</field>
     <description>Registry persist: $(win.eventdata.targetObject)</description>
     <mitre>
       <id>T1547.001</id>
@@ -307,7 +308,7 @@
     <if_sid>61604</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^2$</field>
-    <field name="win.eventdata.targetFilename" type="pcre2" negate="yes">(?i)\\AppData\\Local\\(Microsoft\\(Edge\\Update|Edge\\Application|OneDrive)|Google\\Chrome\\(User Data|Application))\\</field>
+    <field name="win.eventdata.targetFilename" type="pcre2" negate="yes">(?i)\\+AppData\\+Local\\+(Microsoft\\+(Edge\\+(Update|Application|User Data)|OneDrive)|Google\\+Chrome\\+(User Data|Application)|Packages\\+MicrosoftWindows\.Client\.CBS_[^\\]+\\+LocalState\\+EBWebView)\\+</field>
     <description>Timestomp: $(win.eventdata.targetFilename)</description>
     <mitre>
       <id>T1070.006</id>
