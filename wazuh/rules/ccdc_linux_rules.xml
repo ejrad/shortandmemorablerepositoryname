@@ -410,4 +410,26 @@
     <group>audit,persistence,account_manipulation,ccdc_high,</group>
   </rule>
 
+  <rule id="102039" level="13">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
+    <field name="audit.exe" type="pcre2">/(sh|bash|dash|python|perl|nc|ncat)$</field>
+    <match type="pcre2">(postfix|dovecot|vsftpd|proftpd|splunkd)</match>
+    <description>Mail/FTP/Splunk shell: $(audit.exe)</description>
+    <mitre>
+      <id>T1059.004</id>
+    </mitre>
+    <group>audit,execution,ccdc_high,</group>
+  </rule>
+
+  <rule id="102040" level="12">
+    <if_group>syscheck</if_group>
+    <field name="syscheck.path" type="pcre2">^(/opt/splunk/etc|/etc/postfix|/etc/dovecot)/</field>
+    <description>Splunk/Mail config mod: $(syscheck.path)</description>
+    <mitre>
+      <id>T1543</id>
+    </mitre>
+    <group>syscheck,persistence,ccdc_high,</group>
+  </rule>
+
 </group>

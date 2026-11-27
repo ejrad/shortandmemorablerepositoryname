@@ -75,7 +75,7 @@
   <rule id="101008" level="13">
     <if_sid>60000,60103,61603</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1)$</field>
-    <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin|mimikatz|procdump|reg\s+save|ntdsutil|certutil\s+-urlcache)</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin|mimikatz|procdump|reg\s+save|ntdsutil|certutil\s+-urlcache|sc\s+(create|config)\s+.*binPath|msbuild|installutil|cmstp)</field>
     <description>Cred dump / LOLBin: $(win.eventdata.commandLine)</description>
     <mitre>
       <id>T1003</id>
@@ -168,7 +168,7 @@
   <rule id="101016" level="12">
     <if_sid>60000,60009,60103,61603,92027,92057</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1|4104)$</field>
-    <field name="win.eventdata.commandLine" type="pcre2">(?i)(bitsadmin.*\/transfer|Invoke-WebRequest|iwr\s+|wget\s+|curl\s+|mshta\s+http|regsvr32.*\/i:http)</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(bitsadmin.*\/transfer|Invoke-WebRequest|iwr\s+|wget\s+|curl\s+|mshta\s+http|regsvr32.*\/i:http|msiexec.*http)</field>
     <description>Download cradle: $(win.eventdata.commandLine)</description>
     <mitre>
       <id>T1105</id>
@@ -363,6 +363,85 @@
       <id>T1562.001</id>
     </mitre>
     <group>defense_evasion,powershell,ccdc_high,</group>
+  </rule>
+
+  <rule id="101033" level="13">
+    <if_sid>61603,92004,92032</if_sid>
+    <field name="win.eventdata.parentImage" type="pcre2">(?i)\\sqlservr\.exe$</field>
+    <field name="win.eventdata.image" type="pcre2">(?i)\\(cmd|powershell|pwsh|rundll32|certutil|mshta)\.exe$</field>
+    <description>MSSQL xp_cmdshell: $(win.eventdata.commandLine)</description>
+    <mitre>
+      <id>T1505.001</id>
+      <id>T1059</id>
+    </mitre>
+    <group>sysmon,execution,ccdc_high,</group>
+  </rule>
+
+  <rule id="101034" level="11">
+    <if_sid>61603,92004,92032,92033</if_sid>
+    <field name="win.eventdata.parentImage" type="pcre2">(?i)\\(wsmprovhost|winrshost)\.exe$</field>
+    <field name="win.eventdata.image" type="pcre2">(?i)\\(cmd|powershell|pwsh|net|whoami|nltest|rundll32)\.exe$</field>
+    <description>WinRM remote exec: $(win.eventdata.commandLine)</description>
+    <mitre>
+      <id>T1021.006</id>
+    </mitre>
+    <group>sysmon,lateral_movement,ccdc_high,</group>
+  </rule>
+
+  <rule id="101035" level="13">
+    <if_sid>61603,92004,92032</if_sid>
+    <field name="win.eventdata.parentImage" type="pcre2">(?i)\\(winlogon|LogonUI)\.exe$</field>
+    <field name="win.eventdata.image" type="pcre2">(?i)\\(cmd|powershell|pwsh|sethc|utilman|osk|narrator|magnify)\.exe$</field>
+    <description>Sticky Keys/access backdoor: $(win.eventdata.image)</description>
+    <mitre>
+      <id>T1546.008</id>
+    </mitre>
+    <group>sysmon,persistence,ccdc_high,</group>
+  </rule>
+
+  <rule id="101036" level="12">
+    <if_sid>60000,60103</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4768$</field>
+    <field name="win.eventdata.ticketEncryptionType" type="pcre2">^0x17$</field>
+    <field name="win.eventdata.serviceName" type="pcre2" negate="yes">(?i)(\$|krbtgt)</field>
+    <description>AS-REP Roasting: $(win.eventdata.targetUserName)</description>
+    <mitre>
+      <id>T1558.004</id>
+    </mitre>
+    <group>credential_access,ad,ccdc_high,</group>
+  </rule>
+
+  <rule id="101037" level="12">
+    <if_sid>60000,60103</if_sid>
+    <field name="win.system.eventID" type="pcre2">^(4719|4946|4948|4950)$</field>
+    <description>Audit/FW policy tamper ($(win.system.eventID))</description>
+    <mitre>
+      <id>T1562.002</id>
+      <id>T1562.004</id>
+    </mitre>
+    <group>defense_evasion,ccdc_high,</group>
+  </rule>
+
+  <rule id="101038" level="12">
+    <if_sid>60000,60103</if_sid>
+    <field name="win.system.eventID" type="pcre2">^(4742|4706|4707)$</field>
+    <description>AD computer/trust tamper ($(win.system.eventID))</description>
+    <mitre>
+      <id>T1098</id>
+      <id>T1484</id>
+    </mitre>
+    <group>ad,persistence,ccdc_high,</group>
+  </rule>
+
+  <rule id="101039" level="12">
+    <if_sid>61613</if_sid>
+    <field name="win.eventdata.targetFilename" type="pcre2">(?i)(\\(inetpub\\wwwroot|xampp\\htdocs)\\.*\.(aspx?|ashx|php|jsp|exe|dll|ps1)|\\Users\\Public\\.*\.(exe|dll|ps1|bat|vbs))$</field>
+    <description>Sysmon drop: $(win.eventdata.targetFilename)</description>
+    <mitre>
+      <id>T1505.003</id>
+      <id>T1105</id>
+    </mitre>
+    <group>sysmon,webshell,persistence,ccdc_high,</group>
   </rule>
 
 </group>

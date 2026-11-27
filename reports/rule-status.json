@@ -66,6 +66,13 @@
     "102030": "FIM alert requires /var/spool/cron to exist before syscheckd baseline scan (>2s); test ran touch + rm in 2s."
   },
   "new": [
+    101033,
+    101034,
+    101035,
+    101036,
+    101037,
+    101038,
+    101039,
     102023,
     102024,
     102025,
@@ -74,6 +81,8 @@
     102028,
     102029,
     102035,
-    102037
+    102037,
+    102039,
+    102040
   ]
 }

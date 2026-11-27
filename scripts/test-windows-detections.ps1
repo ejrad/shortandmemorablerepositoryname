@@ -69,10 +69,20 @@ Write-Ok 'Timestomp test completed.'
 
 Write-Step '11. LOLBin / MiniDump / Lateral Movement / Impact Dry-Run (101008, 101025, 101029, 101031)'
 cmd.exe /c 'certutil.exe -urlcache -f http://127.0.0.1:9/ccdc_lolbin NUL >nul 2>&1'
+cmd.exe /c 'echo sc create ccdc_svc binPath= C:\Windows\Temp\x.exe >nul'
 cmd.exe /c 'echo rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump 0 ccdc.dmp full >nul'
 cmd.exe /c 'echo wmic /node:127.0.0.1 process call create cmd >nul'
 cmd.exe /c 'echo vssadmin delete shadows /all /quiet >nul'
 Write-Ok 'LOLBin, MiniDump, lateral movement, and impact dry-runs completed.'
+
+Write-Step '12. Firewall Rule Tamper & Public Drop (101037, 101039)'
+netsh.exe advfirewall firewall add rule name="CCDC_Test_FW" dir=in action=allow protocol=TCP localport=65432 | Out-Null
+netsh.exe advfirewall firewall delete rule name="CCDC_Test_FW" | Out-Null
+$pubFile = 'C:\Users\Public\ccdc_test.ps1'
+Set-Content -Path $pubFile -Value 'Write-Output ccdc'
+Start-Sleep -Seconds 2
+Remove-Item -Path $pubFile -Force -ErrorAction SilentlyContinue
+Write-Ok 'Firewall tamper and Public drop tests completed and cleaned up.'
 
 if (Test-Path 'C:\inetpub\wwwroot') {
     Write-Step '11. IIS Webroot FIM (101012)'
