@@ -67,6 +67,13 @@ Set-Content -Path $tsFile -Value 'timestomp test'
 Remove-Item -Path $tsFile -Force -ErrorAction SilentlyContinue
 Write-Ok 'Timestomp test completed.'
 
+Write-Step '11. LOLBin / MiniDump / Lateral Movement / Impact Dry-Run (101008, 101025, 101029, 101031)'
+cmd.exe /c 'certutil.exe -urlcache -f http://127.0.0.1:9/ccdc_lolbin NUL >nul 2>&1'
+cmd.exe /c 'echo rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump 0 ccdc.dmp full >nul'
+cmd.exe /c 'echo wmic /node:127.0.0.1 process call create cmd >nul'
+cmd.exe /c 'echo vssadmin delete shadows /all /quiet >nul'
+Write-Ok 'LOLBin, MiniDump, lateral movement, and impact dry-runs completed.'
+
 if (Test-Path 'C:\inetpub\wwwroot') {
     Write-Step '11. IIS Webroot FIM (101012)'
     $webTest = 'C:\inetpub\wwwroot\ccdc_test.txt'
