@@ -45,7 +45,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 Find generated dashboard `admin` password:
 ```bash
-sudo tar -O -xf wazuh-install-files.tar wazuh-install-files/wazuh-passwords.txt | grep -A 2 "'admin'"
+sudo tar -O -xf /root/wazuh-install-files.tar wazuh-install-files/wazuh-passwords.txt | grep -A 2 "'admin'"
 ```
 
 Change dashboard `admin` password (requires upper, lower, number, and a symbol from `.*+?-`):

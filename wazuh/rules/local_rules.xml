@@ -33,8 +33,8 @@
 
   <rule id="100205" level="0">
     <if_sid>92900</if_sid>
-    <field name="win.eventdata.sourceImage" type="pcre2">(?i)(\\Windows Defender\\Platform\\.*\\MsMpEng\.exe$|C:\\Windows\\System32\\svchost\.exe$)</field>
-    <field name="win.eventdata.grantedAccess" type="pcre2" negate="yes">(?i)(0x10\b|0x1010|0x1038|0x1410|0x1438|0x143a|0x1f[0-9a-f]{4})</field>
+    <field name="win.eventdata.sourceImage" type="pcre2">(?i)(^C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\[^\\]+\\MsMpEng\.exe$|^C:\\Windows\\System32\\svchost\.exe$)</field>
+    <field name="win.eventdata.grantedAccess" type="pcre2" negate="yes">(?i)0x[0-9a-f]*[13579bdf][0-9a-f]\b</field>
     <description>Windows: Suppressed - Defender/svchost LSASS read</description>
   </rule>
 

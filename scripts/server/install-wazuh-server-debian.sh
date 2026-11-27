@@ -31,6 +31,13 @@ fi
 sed -i -E "s/\b1514\b/${WAZUH_EVENTS_PORT}/g; s/\b1515\b/${WAZUH_ENROLL_PORT}/g" "${TMP_DIR}/wazuh-install.sh"
 sed -i -E "s|(systemctl start )|[[ -f /var/ossec/etc/ossec.conf ]] \&\& sed -i -E 's\|<port>1514</port>\|<port>${WAZUH_EVENTS_PORT}</port>\|g; s\|<port>1515</port>\|<port>${WAZUH_ENROLL_PORT}</port>\|g' /var/ossec/etc/ossec.conf; \1|g" "${TMP_DIR}/wazuh-install.sh"
 bash "${TMP_DIR}/wazuh-install.sh" -a -o -i
+for candidate in ./wazuh-install-files.tar "${TMP_DIR}/wazuh-install-files.tar"; do
+    if [[ -f "$candidate" && ! -f /root/wazuh-install-files.tar ]]; then
+        cp -f "$candidate" /root/wazuh-install-files.tar
+        chmod 600 /root/wazuh-install-files.tar
+        break
+    fi
+done
 
 log_step "Deploying CCDC custom decoders and rules"
 install -d -m 0750 -o root -g wazuh /var/ossec/etc/decoders
@@ -132,6 +139,7 @@ if [[ -f "$DASHBOARD_NDJSON" ]]; then
         for _ in $(seq 1 5); do
             if curl -sk -u "admin:${ADMIN_PASS}" -H "osd-xsrf: true" -F "file=@${DASHBOARD_NDJSON}" "https://127.0.0.1:${DASH_PORT}/api/saved_objects/_import?overwrite=true" 2>/dev/null | grep -q '"success":true'; then
                 log_ok "Imported ccdc-triage-dashboard.ndjson"
+                curl -sk -u "admin:${ADMIN_PASS}" -H "osd-xsrf: true" -H "Content-Type: application/json" -X POST "https://127.0.0.1:${DASH_PORT}/api/opensearch-dashboards/settings/dateFormat" -d '{"value":"hh:mm:ss A"}' >/dev/null 2>&1 || true
                 break
             fi
             sleep 4
@@ -151,3 +159,6 @@ fi
 
 SERVER_IP="$(hostname -I | awk '{print $1}')"
 log_ok "Wazuh Server ready on ${SERVER_IP} (Dashboard: https://${SERVER_IP})"
+if [[ -n "${ADMIN_PASS:-}" ]]; then
+    log_ok "Dashboard admin password: ${ADMIN_PASS}"
+fi

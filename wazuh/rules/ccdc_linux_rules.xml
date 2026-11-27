@@ -2,7 +2,7 @@
 
   <rule id="102001" level="10">
     <if_group>syslog|sudo|audit</if_group>
-    <field name="audit.exe" type="pcre2" negate="yes">/var/ossec/bin/(wazuh-modulesd|wazuh-syscheckd|wazuh-agentd)$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">^/var/ossec/bin/(wazuh-modulesd|wazuh-syscheckd|wazuh-agentd)$</field>
     <match type="pcre2">(?i)(useradd|NOPASSWD|visudo|usermod\b.*-aG\b.*(sudo|wheel|admin))</match>
     <description>User/sudoers privesc</description>
     <mitre>
@@ -74,7 +74,7 @@
   <rule id="102008" level="12">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <field name="audit.exe" type="pcre2" negate="yes">/usr/bin/mktemp$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">^/usr/bin/mktemp$</field>
     <match type="pcre2">(exe="/(tmp|dev/shm|var/tmp)/|a[01]="/(tmp|dev/shm|var/tmp)/|memfd:|exe="[^"]*\(deleted\)")</match>
     <description>Temp/memfd exec: $(audit.exe)</description>
     <mitre>
@@ -86,7 +86,7 @@
 
   <rule id="102009" level="11">
     <if_group>audit|syslog</if_group>
-    <match type="pcre2">(?i)(/dev/tcp/|(\bsh|\bbash)\b.*(\s|")-i(\s|"|$)|\b(nc|ncat)\b.*(\s|")-e(\s|"|$)|\bsocat\b.*exec:|curl.*\|\s*(ba)?sh|wget.*\|\s*(ba)?sh)</match>
+    <match type="pcre2">(?i)(/dev/tcp/|(\bsh|\bbash)\b.*(\s|")-i(\s|"|$)|\b(nc|ncat|busybox\s+nc)\b.*(\s|")-(e|c)(\s|"|$)|\bsocat\b.*(exec:|tcp)|openssl\s+s_client|curl.*\|\s*(ba|da|z)?sh|wget.*\|\s*(ba|da|z)?sh)</match>
     <description>Reverse shell / piped payload</description>
     <mitre>
       <id>T1059.004</id>
@@ -120,7 +120,7 @@
   <rule id="102012" level="12">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^(shadow_read|suid_priv|ccdc_exec)$</field>
-    <field name="audit.exe" type="pcre2" negate="yes">(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|accounts-daemon|chage|passwd|wazuh-modulesd|wazuh-syscheckd|sshd-session|stat|useradd|userdel)$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">^(/usr)?/(s?bin|lib(exec)?/[^/]+|libexec/[^/]+|var/ossec/bin)/(unix_chkpwd|gdm-session-worker|polkit-agent-helper-1|accounts-daemon|chage|passwd|su|systemd-executor|wazuh-modulesd|wazuh-syscheckd|sshd-session|stat|useradd|userdel)$|^/var/ossec/bin/(wazuh-modulesd|wazuh-syscheckd)$</field>
     <match type="pcre2">(chmod\b.*(\s|")(\+s|u\+s|[2467][0-7]{3})(\s|")|setcap\b|find\b.*-perm.*-4000|/etc/shadow)</match>
     <description>SUID/shadow access</description>
     <mitre>
@@ -134,7 +134,7 @@
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <field name="audit.cwd" type="pcre2" negate="yes">^/var/ossec$</field>
-    <field name="audit.exe" type="pcre2" negate="yes">(wazuh-modulesd|wazuh-agentd|wazuh-syscheckd)$</field>
+    <field name="audit.exe" type="pcre2" negate="yes">^/var/ossec/bin/(wazuh-modulesd|wazuh-agentd|wazuh-syscheckd)$</field>
     <match type="pcre2">\b(whoami|uname\b.*-a|cat\b.*/etc/passwd|ss\b.*-|netstat\b.*-)</match>
     <description>Host discovery cmd</description>
     <mitre>
@@ -158,7 +158,7 @@
 
   <rule id="102015" level="13">
     <if_group>audit</if_group>
-    <field name="audit.comm" type="pcre2">^(sh|bash|dash|python[0-9.]*|perl|nc)$</field>
+    <field name="audit.comm" type="pcre2">^(sh|bash|dash|zsh|python[0-9.]*|perl|php|ruby|nc|ncat|socat|curl|wget)$</field>
     <match type="pcre2">UID="(www-data|apache|nginx|http)"</match>
     <description>Web user shell: $(audit.comm)</description>
     <mitre>
@@ -169,7 +169,7 @@
 
   <rule id="102016" level="10">
     <if_group>web|accesslog</if_group>
-    <match type="pcre2">(?i)(union\s+select|\.\./\.\./|cmd=|eval\(|base64_decode)</match>
+    <match type="pcre2">(?i)(union\s+select|\.\./\.\.|%2e%2e%2f|cmd=|eval\(|system\(|passthru\(|shell_exec\(|base64_decode|php://(input|filter)|\$\{jndi:|/etc/passwd)</match>
     <description>Web SQLi/LFI/webshell</description>
     <mitre>
       <id>T1190</id>
@@ -207,7 +207,7 @@
 
   <rule id="102020" level="13">
     <if_group>syscheck</if_group>
-    <field name="syscheck.path" type="pcre2">^(/bin/|/sbin/|/usr/bin/|/usr/sbin/)</field>
+    <field name="syscheck.path" type="pcre2">^(/bin/|/sbin/|/usr/bin/|/usr/sbin/|/usr/local/bin/|/usr/local/sbin/)</field>
     <description>FIM sys binary: $(syscheck.path)</description>
     <mitre>
       <id>T1036</id>
@@ -230,7 +230,7 @@
   <rule id="102022" level="12">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <match type="pcre2">(exe="/usr/bin/pkexec"|/(tmp|var|home|opt|etc)/\.[a-zA-Z0-9_-]+/)</match>
+    <match type="pcre2">(exe="/usr/bin/pkexec"|/(tmp|var|home|opt|etc|dev/shm|run)/\.[a-zA-Z0-9_-]+/|LD_PRELOAD=)</match>
     <description>pkexec/hidden exec: $(audit.exe)</description>
     <mitre>
       <id>T1068</id>
@@ -338,8 +338,8 @@
 
   <rule id="102032" level="13">
     <if_group>audit</if_group>
-    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <field name="audit.comm" type="pcre2">^(insmod|modprobe|kmod)$</field>
+    <field name="audit.key" type="pcre2">^(ccdc_exec|ccdc_module)$</field>
+    <match type="pcre2">(key="ccdc_module"|comm="(insmod|modprobe|kmod)")</match>
     <description>Kernel module load: $(audit.exe)</description>
     <mitre>
       <id>T1547.006</id>
@@ -350,7 +350,7 @@
   <rule id="102033" level="11">
     <if_group>audit</if_group>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <match type="pcre2">(?i)((curl|wget)\b.*a[0-9]="[^"]*/(tmp|dev/shm)/|\bchisel\b|\bssh\b.*a[0-9]="-(R|L|D))</match>
+    <match type="pcre2">(?i)((curl|wget)\b.*a[0-9]="[^"]*/(tmp|dev/shm)/|\b(chisel|ligolo|sshuttle|frpc|frps|ngrok|cloudflared)\b|comm="ssh".*a[0-9]="-(R|L|D))</match>
     <description>Payload dl / tunnel: $(audit.exe)</description>
     <mitre>
       <id>T1105</id>
@@ -362,8 +362,8 @@
 
   <rule id="102034" level="12">
     <if_group>audit</if_group>
-    <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <match type="pcre2">(?i)((strace|ltrace|gdb)\b.*(\s|")-p(\s|")|/dev/input/event|\blogkeys\b|pam_tty_audit)</match>
+    <field name="audit.key" type="pcre2">^(ccdc_exec|ccdc_ptrace)$</field>
+    <match type="pcre2">(?i)(key="ccdc_ptrace"|(strace|ltrace|gdb)\b.*(\s|")-p(\s|")|/dev/input/event|\blogkeys\b|pam_tty_audit)</match>
     <description>Keylogger / ptrace sniff: $(audit.exe)</description>
     <mitre>
       <id>T1056.001</id>
@@ -414,7 +414,7 @@
   <rule id="102039" level="13">
     <if_sid>80700</if_sid>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
-    <field name="audit.exe" type="pcre2">/(sh|bash|dash|python|perl|nc|ncat)$</field>
+    <field name="audit.exe" type="pcre2">/(sh|bash|dash|zsh|python[0-9.]*|perl|php|ruby|nc|ncat|socat|curl|wget)$</field>
     <match type="pcre2">(postfix|dovecot|vsftpd|proftpd|splunkd)</match>
     <description>Mail/FTP/Splunk shell: $(audit.exe)</description>
     <mitre>

@@ -9,7 +9,59 @@
       <id>T1098</id>
       <id>T1070.001</id>
     </mitre>
-    <group>account_manipulation,ccdc_high,</group>
+    <group>account_manipulation,ccdc_high,
+  <rule id="101040" level="13">
+    <if_sid>61608</if_sid>
+    <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
+    <field name="win.system.eventID" type="pcre2">^6$</field>
+    <field name="win.eventdata.signed" type="pcre2" negate="yes">^true$</field>
+    <description>Unsigned kernel driver load: $(win.eventdata.imageLoaded)</description>
+    <mitre>
+      <id>T1014</id>
+      <id>T1547.006</id>
+    </mitre>
+    <group>sysmon,rootkit,persistence,ccdc_high,
+  <rule id="101041" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.parentImage" type="pcre2">(?i)\\(wmiprvse|services|svchost|taskeng)\.exe$</field>
+    <field name="win.eventdata.image" type="pcre2">(?i)\\(cmd|powershell|pwsh|mshta|rundll32|regsvr32|certutil|wscript|cscript)\.exe$</field>
+    <description>WMI/Service shell exec: $(win.eventdata.parentImage) -> $(win.eventdata.image)</description>
+    <mitre>
+      <id>T1047</id>
+      <id>T1059</id>
+    </mitre>
+    <group>sysmon,lateral_movement,execution,ccdc_high,</group>
+  </rule>
+
+  <rule id="101042" level="11">
+    <if_sid>61650</if_sid>
+    <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
+    <field name="win.system.eventID" type="pcre2">^22$</field>
+    <field name="win.eventdata.queryName" type="pcre2">(?i)(ngrok|trycloudflare\.com|serveo\.net|interact\.sh|oast\.|burpcollaborator|pastebin\.com|raw\.githubusercontent\.com|transfer\.sh)</field>
+    <description>Suspicious DNS query: $(win.eventdata.queryName) by $(win.eventdata.image)</description>
+    <mitre>
+      <id>T1071.004</id>
+      <id>T1105</id>
+    </mitre>
+    <group>sysmon,c2,exfiltration,ccdc_high,</group>
+  </rule>
+
+  <rule id="101043" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4648$</field>
+    <field name="win.eventdata.subjectUserName" type="pcre2" negate="yes">\$$</field>
+    <description>Explicit cred logon (4648): $(win.eventdata.subjectUserName) -> $(win.eventdata.targetUserName)@$(win.eventdata.targetServerName)</description>
+    <mitre>
+      <id>T1078</id>
+      <id>T1021</id>
+    </mitre>
+    <group>lateral_movement,authentication_success,ccdc_medium,</group>
+  </rule>
+
+</group>
+  </rule>
+
+</group>
   </rule>
 
   <rule id="101002" level="12">
@@ -26,7 +78,7 @@
   <rule id="101003" level="13">
     <if_sid>60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^4104$</field>
-    <field name="win.eventdata.scriptBlockText" type="pcre2">(?i)(DownloadString|DownloadFile|DownloadData|IEX|Invoke-Expression|-enc\b|-EncodedCommand|bypass|Invoke-ReflectivePEInjection|VirtualAlloc)</field>
+    <field name="win.eventdata.scriptBlockText" type="pcre2">(?i)(DownloadString|DownloadFile|DownloadData|Net\.WebClient|IEX|Invoke-Expression|-enc\b|-EncodedCommand|bypass|Invoke-ReflectivePEInjection|VirtualAlloc|Get-Keystrokes|SetWindowsHookEx|GetAsyncKeyState)</field>
     <description>Suspicious PS ScriptBlock</description>
     <mitre>
       <id>T1059.001</id>
@@ -64,7 +116,7 @@
   <rule id="101007" level="13">
     <if_sid>60000</if_sid>
     <field name="win.system.channel" type="pcre2">Defender</field>
-    <field name="win.system.eventID" type="pcre2">^(5001|5007)$</field>
+    <field name="win.system.eventID" type="pcre2">^(5001|5004|5007|5010|5012)$</field>
     <description>Defender disabled/tampered ($(win.system.eventID))</description>
     <mitre>
       <id>T1562.001</id>
@@ -75,7 +127,7 @@
   <rule id="101008" level="13">
     <if_sid>61603</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1)$</field>
-    <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin|mimikatz|procdump|rubeus|safetykatz|nanodump|reg\s+save|ntdsutil|certutil.*[\/-]urlcache|sc\s+(create|config)\s+.*binPath|msbuild|installutil|cmstp)</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin|mimikatz|sekurlsa|lsadump|procdump|rubeus|safetykatz|nanodump|sharpdpapi|seatbelt|lazagne|reg\s+save|ntdsutil|certutil.*[\/-]urlcache|sc\s+(create|config)\s+.*binPath|msbuild|installutil|cmstp)</field>
     <description>Cred dump / LOLBin: $(win.eventdata.commandLine)</description>
     <mitre>
       <id>T1003</id>
@@ -143,8 +195,8 @@
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^10$</field>
     <field name="win.eventdata.targetImage" type="pcre2">(?i)\\lsass\.exe$</field>
-    <field name="win.eventdata.grantedAccess" type="pcre2">(?i)(0x10\b|0x1010|0x1038|0x1410|0x1438|0x143a|0x1f[0-9a-f]{4})</field>
-    <field name="win.eventdata.sourceImage" type="pcre2" negate="yes">(?i)\\Windows Defender\\.*\\MsMpEng\.exe$</field>
+    <field name="win.eventdata.grantedAccess" type="pcre2">(?i)0x[0-9a-f]*[13579bdf][0-9a-f]\b</field>
+    <field name="win.eventdata.sourceImage" type="pcre2" negate="yes">(?i)^C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\[^\\]+\\MsMpEng\.exe$</field>
     <description>LSASS access: $(win.eventdata.sourceImage)</description>
     <mitre>
       <id>T1003.001</id>
@@ -195,8 +247,8 @@
     <if_sid>61609</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^7$</field>
-    <field name="win.eventdata.imageLoaded" type="pcre2">(?i)\\(clr|mscoree)\.dll$</field>
-    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)(\\powershell\.exe|\\pwsh\.exe|\\MSBuild\.exe|\\csc\.exe|\\devenv\.exe)$</field>
+    <field name="win.eventdata.imageLoaded" type="pcre2">(?i)\\(clr|mscoree|System\.Management\.Automation(\.ni)?)\.dll$</field>
+    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)(^C:\\Windows\\(System32|SysWOW64)\\WindowsPowerShell\\v1\.0\\powershell\.exe$|^C:\\Program Files\\PowerShell\\[^\\]+\\pwsh\.exe$|^C:\\Windows\\Microsoft\.NET\\Framework(64)?\\[^\\]+\\(MSBuild|csc)\.exe$|^C:\\Program Files.*\\Microsoft Visual Studio\\.*\\(MSBuild|devenv)\.exe$)</field>
     <description>Unmanaged .NET CLR: $(win.eventdata.image)</description>
     <mitre>
       <id>T1620</id>
@@ -208,7 +260,7 @@
     <if_sid>61614,61615</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^(12|13|14)$</field>
-    <field name="win.eventdata.targetObject" type="pcre2">(?i)(\\CurrentVersion\\Run|\\Winlogon\\|\\Image File Execution Options\\|\\AppInit_DLLs)</field>
+    <field name="win.eventdata.targetObject" type="pcre2">(?i)(\\CurrentVersion\\Run|\\Winlogon\\|\\Image File Execution Options\\|\\AppInit_DLLs|\\AppCertDlls|\\Control\\Lsa|\\CurrentControlSet\\Services\\|\\UserInitMprLogonScript|\\Windows Defender\\Exclusions|\\fDenyTSConnections)</field>
     <description>Registry persist: $(win.eventdata.targetObject)</description>
     <mitre>
       <id>T1547.001</id>
@@ -231,7 +283,7 @@
     <if_sid>61619,61620</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^(17|18)$</field>
-    <field name="win.eventdata.pipeName" type="pcre2">(?i)(\\PSEXESVC|\\msagent_|\\postex_|\\status_|\\win_svc|\\mojo\.|\\lsass)</field>
+    <field name="win.eventdata.pipeName" type="pcre2">(?i)(\\PSEXESVC|\\msagent_|\\postex_|\\status_|\\win_svc|\\mojo\.|\\lsass|\\msse-|\\paexec|\\remcom|\\csexec)</field>
     <description>Suspicious pipe: $(win.eventdata.pipeName)</description>
     <mitre>
       <id>T1021.002</id>
@@ -291,7 +343,7 @@
     <if_sid>60103</if_sid>
     <field name="win.system.eventID" type="pcre2">^4769$</field>
     <field name="win.eventdata.ticketEncryptionType" type="pcre2">^0x17$</field>
-    <field name="win.eventdata.targetUserName" type="pcre2" negate="yes">\$$</field>
+    <field name="win.eventdata.serviceName" type="pcre2" negate="yes">(?i)(\$|krbtgt)</field>
     <description>Kerberoasting: $(win.eventdata.serviceName)</description>
     <mitre>
       <id>T1558.003</id>
@@ -325,7 +377,7 @@
   <rule id="101029" level="12">
     <if_sid>61603</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1|4624)$</field>
-    <field name="win.eventdata.commandLine" type="pcre2">(?i)(wmic\s+[\/-]node:|Enter-PSSession|Invoke-Command\s+-ComputerName|psexec|\\\\[^\\]+\\(ADMIN\$|C\$))</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(wmic\s+[\/-]node:|Enter-PSSession|Invoke-Command\s+-ComputerName|psexec|winrs\s+[\/-]r:|schtasks\s+.*[\/-]s\s+|sc\s+\\\\|net\s+use\s+\\\\|\\\\[^\\]+\\(ADMIN\$|C\$|IPC\$))</field>
     <description>Lateral movement: $(win.eventdata.commandLine)</description>
     <mitre>
       <id>T1021.002</id>
@@ -349,7 +401,7 @@
   <rule id="101031" level="13">
     <if_sid>61603,60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1|4104)$</field>
-    <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin\s+delete\s+shadows|wmic\s+shadowcopy\s+delete|bcdedit.*recoveryenabled\s+no|netsh\s+advfirewall\s+set\s+.*state\s+off|Set-NetFirewallProfile.*-Enabled\s+False)</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin\s+delete\s+shadows|wmic\s+shadowcopy\s+delete|bcdedit.*recoveryenabled\s+no|netsh\s+advfirewall\s+set\s+.*state\s+off|Set-NetFirewallProfile.*-Enabled\s+False|wevtutil\s+cl\s|Clear-EventLog|fltmc\s+unload|sysmon(64)?(\.exe)?\s+-u)</field>
     <description>Impact/FW disable: $(win.eventdata.commandLine)</description>
     <mitre>
       <id>T1490</id>
@@ -407,7 +459,7 @@
     <if_sid>60103</if_sid>
     <field name="win.system.eventID" type="pcre2">^4768$</field>
     <field name="win.eventdata.ticketEncryptionType" type="pcre2">^0x17$</field>
-    <field name="win.eventdata.serviceName" type="pcre2" negate="yes">(?i)(\$|krbtgt)</field>
+    <field name="win.eventdata.targetUserName" type="pcre2" negate="yes">\$$</field>
     <description>AS-REP Roasting: $(win.eventdata.targetUserName)</description>
     <mitre>
       <id>T1558.004</id>
@@ -439,7 +491,7 @@
 
   <rule id="101039" level="12">
     <if_sid>61613</if_sid>
-    <field name="win.eventdata.targetFilename" type="pcre2">(?i)(\\(inetpub\\wwwroot|xampp\\htdocs)\\.*\.(aspx?|ashx|php|jsp|exe|dll|ps1)|\\(Users\\(Public|[^\\]+\\(Desktop|Documents|Downloads|AppData\\Roaming|AppData\\Local\\Temp))|ProgramData|Windows\\Temp|Temp|PerfLogs)\\.*\.(exe|dll|ps1|bat|vbs|hta|js|wsh))$</field>
+    <field name="win.eventdata.targetFilename" type="pcre2">(?i)(\\(inetpub\\wwwroot|xampp\\htdocs)\\.*\.(aspx?|ashx|php|jsp|exe|dll|ps1)|\\(Users\\(Public|[^\\]+\\(Desktop|Documents|Downloads|AppData\\Roaming|AppData\\Local\\Temp))|ProgramData|Windows\\Temp|Windows\\Tasks|Windows\\System32\\Tasks|Temp|PerfLogs)\\.*\.(exe|dll|ps1|bat|vbs|hta|js|wsh|sys)|\\Windows\\(System32|SysWOW64)\\(sethc|utilman|osk|narrator|magnify)\.exe)$</field>
     <field name="win.eventdata.targetFilename" type="pcre2" negate="yes">(?i)\\AppData\\Local\\Temp\\__PSScriptPolicyTest_[^\\]+\.ps(1|m1)$</field>
     <description>Sysmon drop: $(win.eventdata.targetFilename)</description>
     <mitre>

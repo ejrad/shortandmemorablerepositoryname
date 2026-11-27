@@ -1,5 +1,9 @@
--a always,exit -F arch=b64 -S execve -k ccdc_exec
--a always,exit -F arch=b32 -S execve -k ccdc_exec
+-a always,exit -F arch=b64 -S execve,execveat -k ccdc_exec
+-a always,exit -F arch=b32 -S execve,execveat -k ccdc_exec
+-a always,exit -F arch=b64 -S init_module,finit_module -k ccdc_module
+-a always,exit -F arch=b32 -S init_module,finit_module -k ccdc_module
+-a always,exit -F arch=b64 -S ptrace -F a0=16 -k ccdc_ptrace
+-a always,exit -F arch=b64 -S ptrace -F a0=16898 -k ccdc_ptrace
 -w /etc/shadow -p rwa -k shadow_read
 -w /etc/passwd -p wa -k ccdc_identity
 -w /etc/sudoers -p wa -k ccdc_priv
@@ -9,4 +13,5 @@
 -w /etc/crontab -p wa -k ccdc_persist
 -w /root/.ssh/ -p wa -k ccdc_persist
 -w /etc/pam.d/ -p wa -k ccdc_persist
--a always,exit -F arch=b64 -S chmod,fchmod,fchmodat -F a1&04000 -k suid_priv
+-a always,exit -F arch=b64 -S chmod,fchmod,fchmodat -F a1&06000 -k suid_priv
+-a always,exit -F arch=b32 -S chmod,fchmod,fchmodat -F a1&06000 -k suid_priv
