@@ -22,13 +22,24 @@
   </rule>
 
   <rule id="100203" level="0">
-    <if_sid>19004,19007,19008,19009</if_sid>
+    <if_sid>19004,19005,19007,19008,19009,19012,19013</if_sid>
     <description>SCA: Suppressed - startup CIS benchmark flood</description>
   </rule>
 
   <rule id="100204" level="0">
     <if_sid>80705</if_sid>
     <description>Auditd: Suppressed - startup rule reload</description>
+  </rule>
+
+  <rule id="100205" level="0">
+    <if_sid>92900</if_sid>
+    <field name="win.eventdata.sourceImage" type="pcre2">(?i)\\Windows Defender\\Platform\\.*\\MsMpEng\.exe$</field>
+    <description>Windows: Suppressed - Defender LSASS scan</description>
+  </rule>
+
+  <rule id="100206" level="0">
+    <if_sid>61634,61638</if_sid>
+    <description>Windows: Suppressed - noisy taskhost/dllhost Sysmon rule</description>
   </rule>
 
 </group>
