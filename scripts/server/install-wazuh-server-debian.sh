@@ -88,19 +88,56 @@ ensure_service_running wazuh-indexer
 ensure_service_running wazuh-dashboard
 
 DASHBOARD_NDJSON="${REPO_ROOT}/wazuh/dashboards/ccdc-triage-dashboard.ndjson"
-if [[ -f "$DASHBOARD_NDJSON" ]] && [[ -f /root/wazuh-install-files.tar || -f ./wazuh-install-files.tar ]]; then
-    TAR_PATH="/root/wazuh-install-files.tar"
-    [[ -f "$TAR_PATH" ]] || TAR_PATH="./wazuh-install-files.tar"
-    ADMIN_PASS="$(tar -xOf "$TAR_PATH" wazuh-install-files/wazuh-passwords.txt 2>/dev/null | grep -A1 "indexer_username: 'admin'" | awk -F"'" '/indexer_password:/{print $2}' | head -n1 || true)"
+if [[ -f "$DASHBOARD_NDJSON" ]]; then
+    ADMIN_PASS=""
+    for f in \
+        /root/wazuh-passwords.txt \
+        /root/wazuh-install-files/wazuh-passwords.txt \
+        "${REPO_ROOT}/wazuh-passwords.txt" \
+        ./wazuh-passwords.txt \
+        /home/*/wazuh-passwords.txt \
+        /home/*/*/wazuh-passwords.txt; do
+        if [[ -f "$f" ]]; then
+            ADMIN_PASS="$(grep -A1 "indexer_username: 'admin'" "$f" 2>/dev/null | awk -F"'" '/indexer_password:/{print $2}' | head -n1 || true)"
+            [[ -n "$ADMIN_PASS" ]] && break
+        fi
+    done
+    if [[ -z "$ADMIN_PASS" ]]; then
+        for tar in \
+            /root/wazuh-install-files.tar \
+            "${REPO_ROOT}/wazuh-install-files.tar" \
+            ./wazuh-install-files.tar \
+            /home/*/wazuh-install-files.tar \
+            /home/*/*/wazuh-install-files.tar; do
+            if [[ -f "$tar" ]]; then
+                ADMIN_PASS="$(tar -xOf "$tar" --wildcards '*passwords.txt' 2>/dev/null | grep -A1 "indexer_username: 'admin'" | awk -F"'" '/indexer_password:/{print $2}' | head -n1 || true)"
+                [[ -n "$ADMIN_PASS" ]] && break
+            fi
+        done
+    fi
+
     if [[ -n "$ADMIN_PASS" ]]; then
         log_step "Importing CCDC Live Triage Dashboard"
-        for _ in $(seq 1 12); do
-            if curl -sk -u "admin:${ADMIN_PASS}" -H "osd-xsrf: true" -F "file=@${DASHBOARD_NDJSON}" "https://127.0.0.1/api/saved_objects/_import?overwrite=true" | grep -q '"success":true'; then
+        DASH_PORT=443
+        if timeout 2 bash -c "exec 3<>/dev/tcp/127.0.0.1/5601" 2>/dev/null; then
+            DASH_PORT=5601
+        fi
+        for _ in $(seq 1 30); do
+            HTTP_CODE="$(curl -sk -o /dev/null -w "%{http_code}" "https://127.0.0.1:${DASH_PORT}/api/status" 2>/dev/null || true)"
+            if [[ "$HTTP_CODE" == "200" || "$HTTP_CODE" == "302" ]]; then
+                break
+            fi
+            sleep 3
+        done
+        for _ in $(seq 1 5); do
+            if curl -sk -u "admin:${ADMIN_PASS}" -H "osd-xsrf: true" -F "file=@${DASHBOARD_NDJSON}" "https://127.0.0.1:${DASH_PORT}/api/saved_objects/_import?overwrite=true" 2>/dev/null | grep -q '"success":true'; then
                 log_ok "Imported ccdc-triage-dashboard.ndjson"
                 break
             fi
-            sleep 5
+            sleep 4
         done
+    else
+        log_warn "Admin password not found for dashboard import"
     fi
 fi
 
