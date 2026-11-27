@@ -4,6 +4,15 @@
   <EventFiltering>
     <RuleGroup name="" groupRelation="or">
       <ProcessCreate onmatch="exclude" />
+      <FileCreate onmatch="include">
+        <TargetFilename condition="contains">\inetpub\wwwroot\</TargetFilename>
+        <TargetFilename condition="contains">\xampp\htdocs\</TargetFilename>
+        <TargetFilename condition="contains">\Users\</TargetFilename>
+        <TargetFilename condition="contains">\ProgramData\</TargetFilename>
+        <TargetFilename condition="contains">\Windows\Temp\</TargetFilename>
+        <TargetFilename condition="contains">\Temp\</TargetFilename>
+        <TargetFilename condition="contains">\PerfLogs\</TargetFilename>
+      </FileCreate>
       <FileCreateTime onmatch="include">
         <TargetFilename condition="contains">\Users\</TargetFilename>
         <TargetFilename condition="contains">\Windows\Temp\</TargetFilename>
@@ -31,6 +40,9 @@
         <PipeName condition="contains">msagent_</PipeName>
         <PipeName condition="contains">postex_</PipeName>
         <PipeName condition="contains">status_</PipeName>
+        <PipeName condition="contains">win_svc</PipeName>
+        <PipeName condition="contains">mojo.</PipeName>
+        <PipeName condition="contains">lsass</PipeName>
       </PipeEvent>
       <WmiEvent onmatch="exclude" />
       <ProcessTampering onmatch="exclude" />

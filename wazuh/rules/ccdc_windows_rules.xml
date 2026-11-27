@@ -2,7 +2,7 @@
 
   <rule id="101001" level="12">
     <if_sid>60103</if_sid>
-    <field name="win.system.eventID" type="pcre2">^(4720|4722|4724|4726|4728|4732|4738|4756|1102)$</field>
+    <field name="win.system.eventID" type="pcre2">^(4720|4722|4724|4725|4726|4728|4729|4732|4733|4738|4756|1102)$</field>
     <description>Acct backdoor/log clear ($(win.system.eventID))</description>
     <mitre>
       <id>T1136</id>
@@ -14,7 +14,7 @@
 
   <rule id="101002" level="12">
     <if_sid>60103,60602</if_sid>
-    <field name="win.system.eventID" type="pcre2">^(7045|4697|4698)$</field>
+    <field name="win.system.eventID" type="pcre2">^(7045|4697|4698|4702)$</field>
     <description>New service/task ($(win.system.eventID))</description>
     <mitre>
       <id>T1543.003</id>
@@ -26,7 +26,7 @@
   <rule id="101003" level="13">
     <if_sid>60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^4104$</field>
-    <field name="win.eventdata.scriptBlockText" type="pcre2">(?i)(DownloadString|IEX|Invoke-Expression|-enc\b|-EncodedCommand|bypass|Invoke-ReflectivePEInjection)</field>
+    <field name="win.eventdata.scriptBlockText" type="pcre2">(?i)(DownloadString|DownloadFile|DownloadData|IEX|Invoke-Expression|-enc\b|-EncodedCommand|bypass|Invoke-ReflectivePEInjection|VirtualAlloc)</field>
     <description>Suspicious PS ScriptBlock</description>
     <mitre>
       <id>T1059.001</id>
@@ -75,7 +75,7 @@
   <rule id="101008" level="13">
     <if_sid>61603</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1)$</field>
-    <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin|mimikatz|procdump|reg\s+save|ntdsutil|certutil\s+-urlcache|sc\s+(create|config)\s+.*binPath|msbuild|installutil|cmstp)</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin|mimikatz|procdump|rubeus|safetykatz|nanodump|reg\s+save|ntdsutil|certutil.*[\/-]urlcache|sc\s+(create|config)\s+.*binPath|msbuild|installutil|cmstp)</field>
     <description>Cred dump / LOLBin: $(win.eventdata.commandLine)</description>
     <mitre>
       <id>T1003</id>
@@ -143,7 +143,8 @@
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^10$</field>
     <field name="win.eventdata.targetImage" type="pcre2">(?i)\\lsass\.exe$</field>
-    <field name="win.eventdata.sourceImage" type="pcre2" negate="yes">(?i)(\\Windows Defender\\Platform\\.*\\MsMpEng\.exe$|C:\\Windows\\System32\\svchost\.exe$)</field>
+    <field name="win.eventdata.grantedAccess" type="pcre2">(?i)(0x10\b|0x1010|0x1038|0x1410|0x1438|0x143a|0x1f[0-9a-f]{4})</field>
+    <field name="win.eventdata.sourceImage" type="pcre2" negate="yes">(?i)\\Windows Defender\\.*\\MsMpEng\.exe$</field>
     <description>LSASS access: $(win.eventdata.sourceImage)</description>
     <mitre>
       <id>T1003.001</id>
@@ -156,7 +157,8 @@
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^3$</field>
     <field name="win.eventdata.initiated" type="pcre2">^true$</field>
-    <field name="win.eventdata.image" type="pcre2">(?i)(\\(powershell|pwsh|cmd|rundll32|regsvr32|mshta|wscript|cscript|certutil)\.exe$|\\(Users|Temp|ProgramData)\\)</field>
+    <field name="win.eventdata.image" type="pcre2">(?i)(\\(powershell|pwsh|cmd|rundll32|regsvr32|mshta|wscript|cscript|certutil|bitsadmin)\.exe$|\\(Users|ProgramData|Windows\\Temp|Temp|PerfLogs)\\)</field>
+    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)\\AppData\\Local\\(Google\\Chrome\\Application\\chrome|Microsoft\\Edge\\Application\\msedge|Microsoft\\OneDrive\\OneDrive)\.exe$</field>
     <description>C2 outbound: $(win.eventdata.image) -> $(win.eventdata.destinationIp):$(win.eventdata.destinationPort)</description>
     <mitre>
       <id>T1071</id>
@@ -168,7 +170,7 @@
   <rule id="101016" level="12">
     <if_sid>61603,60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1|4104)$</field>
-    <field name="win.eventdata.commandLine" type="pcre2">(?i)(bitsadmin.*\/transfer|Invoke-WebRequest|iwr\s+|wget\s+|curl\s+|mshta\s+http|regsvr32.*\/i:http|msiexec.*http)</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(bitsadmin.*[\/-]transfer|Invoke-WebRequest|iwr\s+|wget\s+|curl\s+|mshta\s+http|regsvr32.*[\/-]i:http|msiexec.*http)</field>
     <description>Download cradle: $(win.eventdata.commandLine)</description>
     <mitre>
       <id>T1105</id>
@@ -180,7 +182,8 @@
     <if_sid>61603</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^1$</field>
-    <field name="win.eventdata.image" type="pcre2">(?i)(\\Users\\[^\\]+\\AppData\\|\\Windows\\Temp\\|\\ProgramData\\)</field>
+    <field name="win.eventdata.image" type="pcre2">(?i)\\(Users|ProgramData|Windows\\Temp|Temp|PerfLogs)\\</field>
+    <field name="win.eventdata.image" type="pcre2" negate="yes">(?i)\\AppData\\Local\\(Google\\Chrome\\Application\\chrome|Microsoft\\Edge\\Application\\msedge|Microsoft\\EdgeUpdate\\MicrosoftEdgeUpdate|Microsoft\\OneDrive\\OneDrive)\.exe$</field>
     <description>User/temp exec: $(win.eventdata.image)</description>
     <mitre>
       <id>T1204</id>
@@ -252,6 +255,7 @@
     <if_sid>61604</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^2$</field>
+    <field name="win.eventdata.targetFilename" type="pcre2" negate="yes">(?i)\\AppData\\Local\\(Microsoft\\(Edge\\Update|Edge\\Application|OneDrive)|Google\\Chrome\\(User Data|Application))\\</field>
     <description>Timestomp: $(win.eventdata.targetFilename)</description>
     <mitre>
       <id>T1070.006</id>
@@ -287,7 +291,7 @@
     <if_sid>60103</if_sid>
     <field name="win.system.eventID" type="pcre2">^4769$</field>
     <field name="win.eventdata.ticketEncryptionType" type="pcre2">^0x17$</field>
-    <field name="win.eventdata.serviceName" type="pcre2" negate="yes">(?i)(\$|krbtgt)</field>
+    <field name="win.eventdata.targetUserName" type="pcre2" negate="yes">\$$</field>
     <description>Kerberoasting: $(win.eventdata.serviceName)</description>
     <mitre>
       <id>T1558.003</id>
@@ -321,7 +325,7 @@
   <rule id="101029" level="12">
     <if_sid>61603</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1|4624)$</field>
-    <field name="win.eventdata.commandLine" type="pcre2">(?i)(wmic\s+\/node:|Enter-PSSession|Invoke-Command\s+-ComputerName|psexec|\\\\[^\\]+\\(ADMIN\$|C\$))</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(wmic\s+[\/-]node:|Enter-PSSession|Invoke-Command\s+-ComputerName|psexec|\\\\[^\\]+\\(ADMIN\$|C\$))</field>
     <description>Lateral movement: $(win.eventdata.commandLine)</description>
     <mitre>
       <id>T1021.002</id>
@@ -435,7 +439,8 @@
 
   <rule id="101039" level="12">
     <if_sid>61613</if_sid>
-    <field name="win.eventdata.targetFilename" type="pcre2">(?i)(\\(inetpub\\wwwroot|xampp\\htdocs)\\.*\.(aspx?|ashx|php|jsp|exe|dll|ps1)|\\Users\\Public\\.*\.(exe|dll|ps1|bat|vbs))$</field>
+    <field name="win.eventdata.targetFilename" type="pcre2">(?i)(\\(inetpub\\wwwroot|xampp\\htdocs)\\.*\.(aspx?|ashx|php|jsp|exe|dll|ps1)|\\(Users\\(Public|[^\\]+\\(Desktop|Documents|Downloads|AppData\\Roaming|AppData\\Local\\Temp))|ProgramData|Windows\\Temp|Temp|PerfLogs)\\.*\.(exe|dll|ps1|bat|vbs|hta|js|wsh))$</field>
+    <field name="win.eventdata.targetFilename" type="pcre2" negate="yes">(?i)\\AppData\\Local\\Temp\\__PSScriptPolicyTest_[^\\]+\.ps(1|m1)$</field>
     <description>Sysmon drop: $(win.eventdata.targetFilename)</description>
     <mitre>
       <id>T1505.003</id>

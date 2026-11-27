@@ -2,6 +2,7 @@
 
   <rule id="102001" level="10">
     <if_group>syslog|sudo|audit</if_group>
+    <field name="audit.exe" type="pcre2" negate="yes">/var/ossec/bin/(wazuh-modulesd|wazuh-syscheckd|wazuh-agentd)$</field>
     <match type="pcre2">(?i)(useradd|NOPASSWD|visudo|usermod\b.*-aG\b.*(sudo|wheel|admin))</match>
     <description>User/sudoers privesc</description>
     <mitre>
@@ -381,7 +382,7 @@
   </rule>
 
   <rule id="102036" level="13">
-    <if_group>rootcheck</if_group>
+    <if_sid>514,515,516</if_sid>
     <description>Rootcheck anomaly</description>
     <mitre>
       <id>T1014</id>
