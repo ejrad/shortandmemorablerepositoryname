@@ -87,6 +87,23 @@ ensure_service_running wazuh-manager
 ensure_service_running wazuh-indexer
 ensure_service_running wazuh-dashboard
 
+DASHBOARD_NDJSON="${REPO_ROOT}/wazuh/dashboards/ccdc-triage-dashboard.ndjson"
+if [[ -f "$DASHBOARD_NDJSON" ]] && [[ -f /root/wazuh-install-files.tar || -f ./wazuh-install-files.tar ]]; then
+    TAR_PATH="/root/wazuh-install-files.tar"
+    [[ -f "$TAR_PATH" ]] || TAR_PATH="./wazuh-install-files.tar"
+    ADMIN_PASS="$(tar -xOf "$TAR_PATH" wazuh-install-files/wazuh-passwords.txt 2>/dev/null | grep -A1 "indexer_username: 'admin'" | awk -F"'" '/indexer_password:/{print $2}' | head -n1 || true)"
+    if [[ -n "$ADMIN_PASS" ]]; then
+        log_step "Importing CCDC Live Triage Dashboard"
+        for _ in $(seq 1 12); do
+            if curl -sk -u "admin:${ADMIN_PASS}" -H "osd-xsrf: true" -F "file=@${DASHBOARD_NDJSON}" "https://127.0.0.1/api/saved_objects/_import?overwrite=true" | grep -q '"success":true'; then
+                log_ok "Imported ccdc-triage-dashboard.ndjson"
+                break
+            fi
+            sleep 5
+        done
+    fi
+fi
+
 if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
     log_step "Opening Wazuh ports in UFW"
     ufw allow "${WAZUH_EVENTS_PORT}/tcp" >/dev/null
