@@ -124,26 +124,27 @@ if [[ -f "$DASHBOARD_NDJSON" ]]; then
     fi
 
     if [[ -n "$ADMIN_PASS" ]]; then
-        log_step "Importing CCDC Live Triage Dashboard"
-        DASH_PORT=443
-        if timeout 2 bash -c "exec 3<>/dev/tcp/127.0.0.1/5601" 2>/dev/null; then
-            DASH_PORT=5601
-        fi
-        for _ in $(seq 1 30); do
-            HTTP_CODE="$(curl -sk -o /dev/null -w "%{http_code}" "https://127.0.0.1:${DASH_PORT}/api/status" 2>/dev/null || true)"
-            if [[ "$HTTP_CODE" == "200" || "$HTTP_CODE" == "302" ]]; then
-                break
+        log_step "Importing CCDC Live Triage Dashboard (background)"
+        (
+            DASH_PORT=443
+            if timeout 2 bash -c "exec 3<>/dev/tcp/127.0.0.1/5601" 2>/dev/null; then
+                DASH_PORT=5601
             fi
-            sleep 3
-        done
-        for _ in $(seq 1 5); do
-            if curl -sk -u "admin:${ADMIN_PASS}" -H "osd-xsrf: true" -F "file=@${DASHBOARD_NDJSON}" "https://127.0.0.1:${DASH_PORT}/api/saved_objects/_import?overwrite=true" 2>/dev/null | grep -q '"success":true'; then
-                log_ok "Imported ccdc-triage-dashboard.ndjson"
-                curl -sk -u "admin:${ADMIN_PASS}" -H "osd-xsrf: true" -H "Content-Type: application/json" -X POST "https://127.0.0.1:${DASH_PORT}/api/opensearch-dashboards/settings/dateFormat" -d '{"value":"hh:mm:ss A"}' >/dev/null 2>&1 || true
-                break
-            fi
-            sleep 4
-        done
+            for _ in $(seq 1 30); do
+                HTTP_CODE="$(curl -sk -o /dev/null -w "%{http_code}" "https://127.0.0.1:${DASH_PORT}/api/status" 2>/dev/null || true)"
+                if [[ "$HTTP_CODE" == "200" || "$HTTP_CODE" == "302" || "$HTTP_CODE" == "401" ]]; then
+                    break
+                fi
+                sleep 3
+            done
+            for _ in $(seq 1 5); do
+                if curl -sk -u "admin:${ADMIN_PASS}" -H "osd-xsrf: true" -F "file=@${DASHBOARD_NDJSON}" "https://127.0.0.1:${DASH_PORT}/api/saved_objects/_import?overwrite=true" 2>/dev/null | grep -q '"success":true'; then
+                    curl -sk -u "admin:${ADMIN_PASS}" -H "osd-xsrf: true" -H "Content-Type: application/json" -X POST "https://127.0.0.1:${DASH_PORT}/api/opensearch-dashboards/settings/dateFormat" -d '{"value":"hh:mm:ss A"}' >/dev/null 2>&1 || true
+                    break
+                fi
+                sleep 4
+            done
+        ) >/dev/null 2>&1 &
     else
         log_warn "Admin password not found for dashboard import"
     fi
