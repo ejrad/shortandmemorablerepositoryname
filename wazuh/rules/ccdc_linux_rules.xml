@@ -411,7 +411,7 @@
   </rule>
 
   <rule id="102039" level="13">
-    <if_group>audit</if_group>
+    <if_sid>80700</if_sid>
     <field name="audit.key" type="pcre2">^ccdc_exec$</field>
     <field name="audit.exe" type="pcre2">/(sh|bash|dash|python|perl|nc|ncat)$</field>
     <match type="pcre2">(postfix|dovecot|vsftpd|proftpd|splunkd)</match>

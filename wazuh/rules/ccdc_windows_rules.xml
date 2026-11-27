@@ -13,7 +13,7 @@
   </rule>
 
   <rule id="101002" level="12">
-    <if_sid>60000,60103,60600,60601,60602</if_sid>
+    <if_sid>60103,60602</if_sid>
     <field name="win.system.eventID" type="pcre2">^(7045|4697|4698)$</field>
     <description>New service/task ($(win.system.eventID))</description>
     <mitre>
@@ -24,7 +24,7 @@
   </rule>
 
   <rule id="101003" level="13">
-    <if_sid>60000,60009</if_sid>
+    <if_sid>60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^4104$</field>
     <field name="win.eventdata.scriptBlockText" type="pcre2">(?i)(DownloadString|IEX|Invoke-Expression|-enc\b|-EncodedCommand|bypass|Invoke-ReflectivePEInjection)</field>
     <description>Suspicious PS ScriptBlock</description>
@@ -73,7 +73,7 @@
   </rule>
 
   <rule id="101008" level="13">
-    <if_sid>60000,60103,61603</if_sid>
+    <if_sid>61603</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1)$</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin|mimikatz|procdump|reg\s+save|ntdsutil|certutil\s+-urlcache|sc\s+(create|config)\s+.*binPath|msbuild|installutil|cmstp)</field>
     <description>Cred dump / LOLBin: $(win.eventdata.commandLine)</description>
@@ -96,7 +96,7 @@
   </rule>
 
   <rule id="101010" level="7">
-    <if_sid>60000,60103</if_sid>
+    <if_sid>60103</if_sid>
     <field name="win.system.eventID" type="pcre2">^4624$</field>
     <field name="win.eventdata.logonType" type="pcre2">^10$</field>
     <description>RDP logon: $(win.eventdata.targetUserName) from $(win.eventdata.ipAddress)</description>
@@ -107,7 +107,7 @@
   </rule>
 
   <rule id="101011" level="13">
-    <if_sid>60000,60600,60601,60602</if_sid>
+    <if_sid>60602</if_sid>
     <field name="win.system.channel" type="pcre2">^System$</field>
     <field name="win.system.eventID" type="pcre2">^104$</field>
     <description>System log cleared (104)</description>
@@ -152,7 +152,7 @@
   </rule>
 
   <rule id="101015" level="12">
-    <if_sid>61605,92106</if_sid>
+    <if_sid>61605</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^3$</field>
     <field name="win.eventdata.initiated" type="pcre2">^true$</field>
@@ -166,7 +166,7 @@
   </rule>
 
   <rule id="101016" level="12">
-    <if_sid>60000,60009,60103,61603,92027,92057</if_sid>
+    <if_sid>61603,60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1|4104)$</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(bitsadmin.*\/transfer|Invoke-WebRequest|iwr\s+|wget\s+|curl\s+|mshta\s+http|regsvr32.*\/i:http|msiexec.*http)</field>
     <description>Download cradle: $(win.eventdata.commandLine)</description>
@@ -202,7 +202,7 @@
   </rule>
 
   <rule id="101019" level="12">
-    <if_sid>61614,61615,61616</if_sid>
+    <if_sid>61614,61615</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^(12|13|14)$</field>
     <field name="win.eventdata.targetObject" type="pcre2">(?i)(\\CurrentVersion\\Run|\\Winlogon\\|\\Image File Execution Options\\|\\AppInit_DLLs)</field>
@@ -214,7 +214,7 @@
   </rule>
 
   <rule id="101020" level="13">
-    <if_sid>61600,61621,61622,61623</if_sid>
+    <if_sid>61621,61622,61623</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^(19|20|21)$</field>
     <description>WMI persistence ($(win.system.eventID))</description>
@@ -225,7 +225,7 @@
   </rule>
 
   <rule id="101021" level="10">
-    <if_sid>61600,61619,61620</if_sid>
+    <if_sid>61619,61620</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^(17|18)$</field>
     <field name="win.eventdata.pipeName" type="pcre2">(?i)(\\PSEXESVC|\\msagent_|\\postex_|\\status_|\\win_svc|\\mojo\.|\\lsass)</field>
@@ -238,7 +238,7 @@
   </rule>
 
   <rule id="101022" level="13">
-    <if_sid>61600,61653</if_sid>
+    <if_sid>61653</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^25$</field>
     <description>Process hollowing: $(win.eventdata.image)</description>
@@ -260,7 +260,7 @@
   </rule>
 
   <rule id="101024" level="11">
-    <if_sid>61603,92004,92032</if_sid>
+    <if_sid>61603,92004</if_sid>
     <field name="win.system.channel" type="pcre2">^Microsoft-Windows-Sysmon/Operational$</field>
     <field name="win.system.eventID" type="pcre2">^1$</field>
     <field name="win.eventdata.image" type="pcre2">(?i)\\(rundll32|dllhost|werfault)\.exe$</field>
@@ -273,7 +273,7 @@
   </rule>
 
   <rule id="101025" level="13">
-    <if_sid>60000,60103,61603</if_sid>
+    <if_sid>61603</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1)$</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)comsvcs\.dll.*MiniDump</field>
     <description>LSASS MiniDump (comsvcs.dll)</description>
@@ -284,7 +284,7 @@
   </rule>
 
   <rule id="101026" level="12">
-    <if_sid>60000,60103</if_sid>
+    <if_sid>60103</if_sid>
     <field name="win.system.eventID" type="pcre2">^4769$</field>
     <field name="win.eventdata.ticketEncryptionType" type="pcre2">^0x17$</field>
     <field name="win.eventdata.serviceName" type="pcre2" negate="yes">(?i)(\$|krbtgt)</field>
@@ -296,7 +296,7 @@
   </rule>
 
   <rule id="101027" level="13">
-    <if_sid>60000,60103</if_sid>
+    <if_sid>60103</if_sid>
     <field name="win.system.eventID" type="pcre2">^4662$</field>
     <field name="win.eventdata.properties" type="pcre2">(?i)(1131f6aa-9c07-11d1-f79f-00c04fc2dcd2|1131f6ad-9c07-11d1-f79f-00c04fc2dcd2|89e95b76-444d-4c62-991a-0facbeda640c)</field>
     <description>DCSync by $(win.eventdata.subjectUserName)</description>
@@ -307,7 +307,7 @@
   </rule>
 
   <rule id="101028" level="8">
-    <if_sid>60000,61603,92031,92033,92036,92039</if_sid>
+    <if_sid>61603,92031,92039</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1)$</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(\bwhoami\b|\bnltest\b|\bnet\s+(user|group|localgroup|view)\b|SharpHound|BloodHound)</field>
     <description>Win/AD discovery: $(win.eventdata.commandLine)</description>
@@ -319,7 +319,7 @@
   </rule>
 
   <rule id="101029" level="12">
-    <if_sid>60000,60103,61603</if_sid>
+    <if_sid>61603</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1|4624)$</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(wmic\s+\/node:|Enter-PSSession|Invoke-Command\s+-ComputerName|psexec|\\\\[^\\]+\\(ADMIN\$|C\$))</field>
     <description>Lateral movement: $(win.eventdata.commandLine)</description>
@@ -332,7 +332,7 @@
   </rule>
 
   <rule id="101030" level="10">
-    <if_sid>60000,60103,61603,92027</if_sid>
+    <if_sid>61603,92027</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1)$</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(7z(\.exe)?\s+a\s|rar(\.exe)?\s+a\s|Compress-Archive)</field>
     <description>Archive staging: $(win.eventdata.commandLine)</description>
@@ -343,7 +343,7 @@
   </rule>
 
   <rule id="101031" level="13">
-    <if_sid>60000,60009,60103,61603</if_sid>
+    <if_sid>61603,60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4688|1|4104)$</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(vssadmin\s+delete\s+shadows|wmic\s+shadowcopy\s+delete|bcdedit.*recoveryenabled\s+no|netsh\s+advfirewall\s+set\s+.*state\s+off|Set-NetFirewallProfile.*-Enabled\s+False)</field>
     <description>Impact/FW disable: $(win.eventdata.commandLine)</description>
@@ -355,7 +355,7 @@
   </rule>
 
   <rule id="101032" level="13">
-    <if_sid>60000,60009</if_sid>
+    <if_sid>60009</if_sid>
     <field name="win.system.eventID" type="pcre2">^4104$</field>
     <field name="win.eventdata.scriptBlockText" type="pcre2">(?i)(AmsiUtils|amsiInitFailed|EtwEventWrite|Add-MpPreference.*-Exclusion)</field>
     <description>AMSI/ETW bypass or Defender exclusion</description>
@@ -366,7 +366,7 @@
   </rule>
 
   <rule id="101033" level="13">
-    <if_sid>61603,92004,92032</if_sid>
+    <if_sid>61603</if_sid>
     <field name="win.eventdata.parentImage" type="pcre2">(?i)\\sqlservr\.exe$</field>
     <field name="win.eventdata.image" type="pcre2">(?i)\\(cmd|powershell|pwsh|rundll32|certutil|mshta)\.exe$</field>
     <description>MSSQL xp_cmdshell: $(win.eventdata.commandLine)</description>
@@ -378,7 +378,7 @@
   </rule>
 
   <rule id="101034" level="11">
-    <if_sid>61603,92004,92032,92033</if_sid>
+    <if_sid>61603</if_sid>
     <field name="win.eventdata.parentImage" type="pcre2">(?i)\\(wsmprovhost|winrshost)\.exe$</field>
     <field name="win.eventdata.image" type="pcre2">(?i)\\(cmd|powershell|pwsh|net|whoami|nltest|rundll32)\.exe$</field>
     <description>WinRM remote exec: $(win.eventdata.commandLine)</description>
@@ -389,7 +389,7 @@
   </rule>
 
   <rule id="101035" level="13">
-    <if_sid>61603,92004,92032</if_sid>
+    <if_sid>61603</if_sid>
     <field name="win.eventdata.parentImage" type="pcre2">(?i)\\(winlogon|LogonUI)\.exe$</field>
     <field name="win.eventdata.image" type="pcre2">(?i)\\(cmd|powershell|pwsh|sethc|utilman|osk|narrator|magnify)\.exe$</field>
     <description>Sticky Keys/access backdoor: $(win.eventdata.image)</description>
@@ -400,7 +400,7 @@
   </rule>
 
   <rule id="101036" level="12">
-    <if_sid>60000,60103</if_sid>
+    <if_sid>60103</if_sid>
     <field name="win.system.eventID" type="pcre2">^4768$</field>
     <field name="win.eventdata.ticketEncryptionType" type="pcre2">^0x17$</field>
     <field name="win.eventdata.serviceName" type="pcre2" negate="yes">(?i)(\$|krbtgt)</field>
@@ -412,7 +412,7 @@
   </rule>
 
   <rule id="101037" level="12">
-    <if_sid>60000,60103</if_sid>
+    <if_sid>60103</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4719|4946|4948|4950)$</field>
     <description>Audit/FW policy tamper ($(win.system.eventID))</description>
     <mitre>
@@ -423,7 +423,7 @@
   </rule>
 
   <rule id="101038" level="12">
-    <if_sid>60000,60103</if_sid>
+    <if_sid>60103</if_sid>
     <field name="win.system.eventID" type="pcre2">^(4742|4706|4707)$</field>
     <description>AD computer/trust tamper ($(win.system.eventID))</description>
     <mitre>
